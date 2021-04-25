@@ -12,15 +12,16 @@ import {
 } from '@material-ui/core'
 import { Masks, AccountBalanceWallet, ExpandLess, ExpandMore, Settings } from '@material-ui/icons'
 import { useContext } from 'react'
-import { useRouteMatch } from 'react-router'
+import { useMatch } from 'react-router'
 import { Link, LinkProps } from 'react-router-dom'
-import { Routes } from '../../pages/routes'
+import { RoutePaths } from '../../pages/routes'
 import { DashboardContext } from './context'
 import { MaskNotSquareIcon } from '@dimensiondev/icons'
 import { useDashboardI18N } from '../../locales'
 
 function ListItemLinkUnStyled({ nested, ...props }: LinkProps & ListItemProps & { nested?: boolean; to: string }) {
-    return <MuiListItem button component={Link} selected={!!useRouteMatch(props.to)} {...props} />
+    // @ts-ignore
+    return <MuiListItem button component={Link} selected={!!useMatch(props.to)} {...props} />
 }
 
 const ListItemLink = styled(ListItemLinkUnStyled)(({ theme, nested }) => ({
@@ -62,39 +63,39 @@ export function Navigation({}: NavigationProps) {
                     <MaskNotSquareIcon />
                 </LogoItem>
             )}
-            <ListItemLink to={Routes.Personas}>
+            <ListItemLink to={RoutePaths.Personas}>
                 <ListItemIcon>
                     <Masks />
                 </ListItemIcon>
                 <ListItemText primary={t.personas()} />
             </ListItemLink>
-            <ListItem button selected={!!useRouteMatch(Routes.Wallets)} onClick={toggleNavigationExpand}>
+            <ListItemLink to={RoutePaths.Wallets}>
                 <ListItemIcon>
                     <AccountBalanceWallet />
                 </ListItemIcon>
                 <ListItemText>{t.wallets()}</ListItemText>
-                {expanded ? <ExpandLess /> : <ExpandMore />}
-            </ListItem>
-            <Collapse in={expanded}>
+                {!!useMatch(RoutePaths.Wallets) ? <ExpandLess /> : <ExpandMore />}
+            </ListItemLink>
+            <Collapse in={!!useMatch(RoutePaths.Wallets)}>
                 <List disablePadding>
-                    <ListItemLink nested to={Routes.WalletsTransfer}>
+                    <ListItemLink nested to={RoutePaths.WalletsTransfer}>
                         <ListItemText primary={t.wallets_transfer()} />
                     </ListItemLink>
-                    <ListItemLink nested to={Routes.WalletsSwap}>
+                    <ListItemLink nested to={RoutePaths.WalletsSwap}>
                         <ListItemText primary={t.wallets_swap()} />
                     </ListItemLink>
-                    <ListItemLink nested to={Routes.WalletsRedPacket}>
+                    <ListItemLink nested to={RoutePaths.WalletsRedPacket}>
                         <ListItemText primary={t.wallets_red_packet()} />
                     </ListItemLink>
-                    <ListItemLink nested to={Routes.WalletsSell}>
+                    <ListItemLink nested to={RoutePaths.WalletsSell}>
                         <ListItemText primary={t.wallets_sell()} />
                     </ListItemLink>
-                    <ListItemLink nested to={Routes.WalletsHistory}>
+                    <ListItemLink nested to={RoutePaths.WalletsHistory}>
                         <ListItemText primary={t.wallets_history()} />
                     </ListItemLink>
                 </List>
             </Collapse>
-            <ListItemLink to={Routes.Settings}>
+            <ListItemLink to={RoutePaths.Settings}>
                 <ListItemIcon>
                     <Settings />
                 </ListItemIcon>
