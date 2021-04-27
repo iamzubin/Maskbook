@@ -1,7 +1,9 @@
 import { memo, PropsWithChildren } from 'react'
-import { Drawer, makeStyles } from '@material-ui/core'
+import { Box, Button, Drawer, makeStyles } from '@material-ui/core'
 import { PersonaState } from '../../hooks/usePersonaState'
 import { PersonaCard } from '../PersonaCard'
+import { MaskColorVar } from '@dimensiondev/maskbook-theme'
+import { AddPersonaCard } from '../AddPersonaCard'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -10,8 +12,21 @@ const useStyles = makeStyles((theme) => ({
     paper: {
         top: `64px`,
         padding: theme.spacing(3.75, 3.75, 0, 3.75),
+        background: MaskColorVar.suspensionBackground,
         '& > *': {
             marginTop: theme.spacing(1.5),
+        },
+    },
+    buttons: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gridColumnGap: theme.spacing(3.5),
+    },
+    backup: {
+        backgroundColor: MaskColorVar.warning,
+        '&:hover': {
+            backgroundColor: MaskColorVar.warning,
+            boxShadow: `0 0 5px ${MaskColorVar.warning}`,
         },
     },
 }))
@@ -20,9 +35,8 @@ export interface PersonaDrawer extends PropsWithChildren<{}> {}
 
 export const PersonaDrawer = memo<PersonaDrawer>(({ children }) => {
     const classes = useStyles()
-    const { personas, drawerOpen, toggleDrawer } = PersonaState.useContainer()
+    const { drawerOpen, toggleDrawer } = PersonaState.useContainer()
 
-    console.log(personas)
     return (
         <Drawer
             anchor="right"
@@ -31,7 +45,7 @@ export const PersonaDrawer = memo<PersonaDrawer>(({ children }) => {
             variant="temporary"
             hideBackdrop
             elevation={0}
-            classes={classes}>
+            classes={{ root: classes.root, paper: classes.paper }}>
             <PersonaCard
                 active={false}
                 nickName="Yisiliu"
@@ -54,6 +68,11 @@ export const PersonaDrawer = memo<PersonaDrawer>(({ children }) => {
                     },
                 ]}
             />
+            <AddPersonaCard onConfirm={(name) => console.log(name)} onCancel={() => console.log('cancel')} />
+            <Box className={classes.buttons}>
+                <Button>Add Persona</Button>
+                <Button className={classes.backup}>Backups</Button>
+            </Box>
         </Drawer>
     )
 })
