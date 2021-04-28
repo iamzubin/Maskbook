@@ -24,6 +24,10 @@ import { useValueRef } from '../../utils/hooks/useValueRef'
 import { activatedSocialNetworkUI } from '../../social-network'
 import Services from '../../extension/service'
 import { SelectRecipientsUI, SelectRecipientsUIProps } from '../shared/SelectRecipients/SelectRecipients'
+import {
+    SelectRecipientsUnlockUI,
+    SelectRecipientsUnlockUIProps,
+} from '../shared/SelectRecipients/SelectRecipientsUnlock'
 import { ClickableChip } from '../shared/SelectRecipients/ClickableChip'
 import {
     TypedMessage,
@@ -47,6 +51,8 @@ import { Flags } from '../../utils/flags'
 import { editActivatedPostMetadata, globalTypedMessageMetadata } from '../../protocols/typed-message/global-state'
 import { isTwitter } from '../../social-network-adaptor/twitter.com/base'
 import { SteganographyTextPayload } from './SteganographyTextPayload'
+import type { UnlockLocks } from '../../unlock-protocol/types'
+import { getLocks } from '../../unlock-protocol/functions'
 
 const defaultTheme = {}
 
@@ -76,6 +82,8 @@ export interface PostDialogUIProps extends withClasses<never> {
     maxLength?: number
     availableShareTarget: Array<Profile | Group>
     currentShareTarget: Array<Profile | Group>
+    availableUnlockTarget: UnlockLocks[]
+    currentUnlockTarget: UnlockLocks[]
     currentIdentity: Profile | null
     postContent: TypedMessage
     postBoxButtonDisabled: boolean
@@ -86,6 +94,7 @@ export interface PostDialogUIProps extends withClasses<never> {
     onFinishButtonClicked: () => void
     onCloseButtonClicked: () => void
     onSetSelected: SelectRecipientsUIProps['onSetSelected']
+    onSetUnlockSelected: SelectRecipientsUnlockUIProps['onSetUnlockSelected']
     DialogProps?: Partial<DialogProps>
     SelectRecipientsUIProps?: Partial<SelectRecipientsUIProps>
 }
@@ -205,6 +214,11 @@ export function PostDialogUI(props: PostDialogUIProps) {
                                     onClick={() => props.onOnlyMyselfChanged(!props.onlyMyself)}
                                 />
                             </SelectRecipientsUI>
+                            <SelectRecipientsUnlockUI
+                                itemsUnlock={props.availableUnlockTarget}
+                                selectedUnlock={props.currentUnlockTarget}
+                                onSetUnlockSelected={props.onSetUnlockSelected}
+                                {...props.SelectRecipientsUIProps}></SelectRecipientsUnlockUI>
                         </Box>
 
                         <Typography style={{ marginBottom: 10 }}>{t('post_dialog__more_options_title')}</Typography>
@@ -294,6 +308,39 @@ export function PostDialog({ reason: props_reason = 'timeline', ...props }: Post
     const currentIdentity = or(props.currentIdentity, useCurrentIdentity())
     const [currentShareTarget, setCurrentShareTarget] = useState<(Profile | Group)[]>(() => [])
     //#endregion
+
+    //#regionUnlock
+    const [currentUnlockTarget, setCurrentUnlockTarget] = useState<UnlockLocks[]>(() => [])
+    const [availableUnlockTarget, setAvailableUnlockTarget] = useState<UnlockLocks[]>(() => [])
+    //#endregion
+    useEffect(() => {
+        setTimeout(() => {
+            getLocks('0x33ab07dF7f09e793dDD1E9A25b079989a557119A')
+                .then(function (value) {
+                    setAvailableUnlockTarget([
+                        {
+                            lock: {
+                                name: '90 year of Ethereums',
+                                address: '0x78e133eb8125b1ecddb4b7a520ba2085a20c1144',
+                                price: '0',
+                            },
+                        },
+                    ])
+                })
+                .catch((error) => {
+                    setAvailableUnlockTarget([
+                        {
+                            lock: {
+                                name: error.message,
+                                address: '0x78e133eb8125b1ecddb4b7a520ba2085a20c1144',
+                                price: '0',
+                            },
+                        },
+                    ])
+                })
+        }, 3000)
+    })
+
     //#region Image Based Payload Switch
     const imagePayloadStatus = useValueRef(currentImagePayloadStatus[activatedSocialNetworkUI.networkIdentifier])
     const imagePayloadEnabled = imagePayloadStatus === 'true'
@@ -438,11 +485,14 @@ export function PostDialog({ reason: props_reason = 'timeline', ...props }: Post
             imagePayload={!textOnly && (imageOnly || imagePayloadEnabled)}
             imagePayloadUnchangeable={imagePayloadButtonForzen}
             currentIdentity={currentIdentity}
+            availableUnlockTarget={availableUnlockTarget}
+            currentUnlockTarget={currentUnlockTarget}
             currentShareTarget={currentShareTarget}
             postContent={postBoxContent}
             postBoxButtonDisabled={isPostButtonDisabled}
             maxLength={560}
             onSetSelected={setCurrentShareTarget}
+            onSetUnlockSelected={setCurrentUnlockTarget}
             onPostContentChanged={setPostBoxContent}
             onShareToEveryoneChanged={onShareToEveryoneChanged}
             onOnlyMyselfChanged={onOnlyMyselfChanged}
