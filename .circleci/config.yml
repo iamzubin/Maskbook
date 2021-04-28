@@ -6,7 +6,7 @@ version: 2.1
 executors:
   maskbook_node:
     docker:
-      - image: circleci/node:15.3.0
+      - image: circleci/node:16.0.0
     working_directory: ~/repo
 commands:
   restore_workspace:
@@ -22,15 +22,15 @@ jobs:
       - restore_cache:
           name: Restore PNPM Package Cache
           keys:
-            - v3-maskbook-cache-pnpm-{{ checksum "pnpm-lock.yaml" }}
+            - v3-maskbook-cache-pnpm
       - run:
           name: Install Dependencies
-          command: npx pnpm install --frozen-lockfile --store-dir ~/.pnpmx/
+          command: npx pnpm install --frozen-lockfile --store-dir ~/.pnpm-v2/
       - save_cache:
-          name: Save PNPM Package Cache
-          key: v3-maskbook-cache-pnpm-{{ checksum "pnpm-lock.yaml" }}
+          name: Save NPM Package Cache
+          key: v3-maskbook-cache-npm
           paths:
-            - ~/.pnpmx/
+            - ~/.pnpm/
       - persist_to_workspace:
           root: ~/
           paths:
