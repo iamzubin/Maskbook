@@ -74,10 +74,7 @@ export function SelectRecipientsUnlockDialogUI(props: SelectRecipientsUnlockDial
                             <LockInList
                                 item={item}
                                 search={search}
-                                checked={
-                                    props.selected.some((x) => x.lock.address === item.lock.address) ||
-                                    disabledItems?.includes(item)
-                                }
+                                checked={props.selected.some((x) => x.lock.address === item.lock.address)}
                                 disabled={props.disabled || disabledItems?.includes(item)}
                                 onChange={(_, checked) => {
                                     if (checked) {

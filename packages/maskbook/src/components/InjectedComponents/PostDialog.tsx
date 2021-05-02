@@ -317,15 +317,7 @@ export function PostDialog({ reason: props_reason = 'timeline', ...props }: Post
         setTimeout(() => {
             getLocks('0x33ab07dF7f09e793dDD1E9A25b079989a557119A')
                 .then(function (value) {
-                    setAvailableUnlockTarget([
-                        {
-                            lock: {
-                                name: '90 year of Ethereums',
-                                address: '0x78e133eb8125b1ecddb4b7a520ba2085a20c1144',
-                                price: '0',
-                            },
-                        },
-                    ])
+                    setAvailableUnlockTarget(value.lockManagers)
                 })
                 .catch((error) => {
                     setAvailableUnlockTarget([
