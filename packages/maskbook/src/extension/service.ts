@@ -32,6 +32,7 @@ export const Services = {
     Helper: add(() => import('./background-script/HelperService'), 'Helper'),
     Provider: add(() => import('./background-script/ProviderService'), 'Provider'),
     Ethereum: add(() => import('./background-script/EthereumService'), 'Ethereum'),
+    UnlockProtocol: add(() => import('./background-script/UnlockProtocolService'), 'UnlockProtocol'),
 }
 export default Services
 export const ServicesWithProgress = add(() => import('./service-generator'), 'ServicesWithProgress', true)
@@ -47,6 +48,7 @@ if (module.hot && isEnvironment(Environment.ManifestBackground)) {
             './background-script/HelperService',
             './background-script/ProviderService',
             './background-script/EthereumService',
+            './background-script/UnlockProtocolService',
             './service-generator',
         ],
         () => document.dispatchEvent(new Event(SERVICE_HMR_EVENT)),

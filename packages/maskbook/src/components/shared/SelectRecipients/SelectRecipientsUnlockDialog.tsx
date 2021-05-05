@@ -14,7 +14,7 @@ import { useStylesExtends } from '../../custom-ui-helper'
 import { useI18N } from '../../../utils/i18n-next-ui'
 import { LockInList } from './LockInList'
 import { InjectedDialog } from '../InjectedDialog'
-import type { UnlockLocks } from '../../../unlock-protocol/types'
+import type { UnlockLocks } from '../../../extension/background-script/UnlockProtocolServices/types'
 
 const useStyles = makeStyles((theme) => ({
     content: {

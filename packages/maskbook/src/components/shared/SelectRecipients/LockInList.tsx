@@ -5,7 +5,7 @@ import { useStylesExtends } from '../../custom-ui-helper'
 import type { DefaultComponentProps } from '@material-ui/core/OverridableComponent'
 import type { CheckboxProps } from '@material-ui/core/Checkbox'
 import type { ListItemTypeMap } from '@material-ui/core/ListItem'
-import type { UnlockLocks } from '../../../unlock-protocol/types'
+import type { UnlockLocks } from '../../../extension/background-script/UnlockProtocolServices/types'
 
 const useStyle = makeStyles((theme: Theme) => ({
     root: {

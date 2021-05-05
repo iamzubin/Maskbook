@@ -51,8 +51,8 @@ import { Flags } from '../../utils/flags'
 import { editActivatedPostMetadata, globalTypedMessageMetadata } from '../../protocols/typed-message/global-state'
 import { isTwitter } from '../../social-network-adaptor/twitter.com/base'
 import { SteganographyTextPayload } from './SteganographyTextPayload'
-import type { UnlockLocks } from '../../unlock-protocol/types'
-import { getLocks } from '../../unlock-protocol/functions'
+import type { UnlockLocks } from '../../extension/background-script/UnlockProtocolServices/types'
+import { useAccount } from '../../web3/hooks/useAccount'
 
 const defaultTheme = {}
 
@@ -313,9 +313,11 @@ export function PostDialog({ reason: props_reason = 'timeline', ...props }: Post
     const [currentUnlockTarget, setCurrentUnlockTarget] = useState<UnlockLocks[]>(() => [])
     const [availableUnlockTarget, setAvailableUnlockTarget] = useState<UnlockLocks[]>(() => [])
     //#endregion
+    const addr = useAccount()
     useEffect(() => {
         setTimeout(() => {
-            getLocks('0x33ab07dF7f09e793dDD1E9A25b079989a557119A')
+            // Services.UnlockProtocol.getLocks(addr) UNCOMMENT
+            Services.UnlockProtocol.getLocks('0x33ab07dF7f09e793dDD1E9A25b079989a557119A')
                 .then(function (value) {
                     setAvailableUnlockTarget(value.lockManagers)
                 })
@@ -323,8 +325,8 @@ export function PostDialog({ reason: props_reason = 'timeline', ...props }: Post
                     setAvailableUnlockTarget([
                         {
                             lock: {
-                                name: error.message,
-                                address: '0x78e133eb8125b1ecddb4b7a520ba2085a20c1144',
+                                name: error.message || 'Some error occured',
+                                address: '0x0',
                                 price: '0',
                             },
                         },

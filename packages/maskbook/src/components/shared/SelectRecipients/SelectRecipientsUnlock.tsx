@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { SelectRecipientsUnlockDialogUIProps, SelectRecipientsUnlockDialogUI } from './SelectRecipientsUnlockDialog'
 import { useI18N } from '../../../utils/i18n-next-ui'
 import { useStylesExtends } from '../../custom-ui-helper'
-import type { UnlockLocks } from '../../../unlock-protocol/types'
+import type { UnlockLocks } from '../../../extension/background-script/UnlockProtocolServices/types'
 
 const useStyles = makeStyles({
     root: {
@@ -39,7 +39,7 @@ export function SelectRecipientsUnlockUI<T extends UnlockLocks>(props: SelectRec
                     selected: new Set([...selectedUnlock.map((x) => x.lock.address)]).size,
                 })}
                 avatar={<AddIcon />}
-                disabled={props.disabled}
+                disabled={props.disabled || itemsUnlock.length == 0}
                 onClick={() => setOpen(true)}
             />
             <SelectRecipientsUnlockDialogUI
