@@ -35,6 +35,7 @@ const OthersAESKeyEncryptedMap = new Map<
 export async function encryptTo(
     content: TypedMessage,
     to: (ProfileIdentifier | GroupIdentifier)[],
+    unlockTarget: String[],
     whoAmI: ProfileIdentifier,
     publicShared: boolean,
 ): Promise<[EncryptedText, OthersAESKeyEncryptedToken]> {
@@ -82,6 +83,7 @@ export async function encryptTo(
         postBy: whoAmI,
         postCryptoKey: postAESKey,
         recipients: recipients,
+        unlockTargets: unlockTarget,
         foundAt: new Date(),
         recipientGroups: to.filter((x) => x instanceof GroupIdentifier) as GroupIdentifier[],
     })

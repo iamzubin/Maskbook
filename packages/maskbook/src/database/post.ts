@@ -173,6 +173,7 @@ export async function updatePostDB(
         identifier: updateRecord.identifier,
         recipients: new IdentifierMap(new Map()),
         postBy: ProfileIdentifier.unknown,
+        unlockTargets: [],
         foundAt: new Date(),
         recipientGroups: [],
     }
@@ -238,7 +239,7 @@ export async function deletePostCryptoKeyDB(record: PostIVIdentifier, t?: PostTr
 
 //#region db in and out
 function postOutDB(db: PostDBRecord): PostRecord {
-    const { identifier, foundAt, postBy, recipientGroups, recipients, postCryptoKey } = db
+    const { identifier, foundAt, postBy, recipientGroups, recipients, unlockTargets, postCryptoKey } = db
     for (const detail of recipients.values()) {
         detail.reason.forEach((x) => x.type === 'group' && restorePrototype(x.group, GroupIdentifier.prototype))
     }
@@ -246,6 +247,7 @@ function postOutDB(db: PostDBRecord): PostRecord {
         identifier: Identifier.fromString(identifier, PostIVIdentifier).unwrap(),
         recipientGroups: restorePrototypeArray(recipientGroups, GroupIdentifier.prototype),
         postBy: restorePrototype(postBy, ProfileIdentifier.prototype),
+        unlockTargets: unlockTargets,
         recipients: new IdentifierMap(recipients, ProfileIdentifier),
         foundAt: foundAt,
         postCryptoKey: postCryptoKey,
@@ -291,6 +293,7 @@ export interface PostRecord {
      * Receivers
      */
     recipients: IdentifierMap<ProfileIdentifier, RecipientDetail>
+    unlockTargets?: String[]
     /**
      * This post shared with these groups.
      */

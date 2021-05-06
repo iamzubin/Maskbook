@@ -276,7 +276,7 @@ export interface PostDialogProps extends Omit<Partial<PostDialogUIProps>, 'open'
     open?: [boolean, (next: boolean) => void]
     reason?: 'timeline' | 'popup'
     identities?: Profile[]
-    onRequestPost?: (target: (Profile | Group)[], content: TypedMessage) => void
+    onRequestPost?: (target: (Profile | Group)[], unlockTarget: UnlockLocks[], content: TypedMessage) => void
     onRequestReset?: () => void
     typedMessageMetadata?: ReadonlyMap<string, any>
 }
@@ -349,10 +349,11 @@ export function PostDialog({ reason: props_reason = 'timeline', ...props }: Post
     const onRequestPost = or(
         props.onRequestPost,
         useCallback(
-            async (target: (Profile | Group)[], content: TypedMessage) => {
+            async (target: (Profile | Group)[], unlockTarget: UnlockLocks[], content: TypedMessage) => {
                 const [encrypted, token] = await Services.Crypto.encryptTo(
                     content,
                     target.map((x) => x.identifier),
+                    unlockTarget.map((x) => x.lock.address),
                     currentIdentity!.identifier,
                     !!shareToEveryone,
                 )
@@ -419,7 +420,7 @@ export function PostDialog({ reason: props_reason = 'timeline', ...props }: Post
         }, [setOpen]),
     )
     const onFinishButtonClicked = useCallback(() => {
-        onRequestPost(onlyMyself ? [currentIdentity!] : currentShareTarget, postBoxContent)
+        onRequestPost(onlyMyself ? [currentIdentity!] : currentShareTarget, currentUnlockTarget, postBoxContent)
         onRequestReset()
     }, [currentIdentity, currentShareTarget, onRequestPost, onRequestReset, onlyMyself, postBoxContent])
     const onCloseButtonClicked = useCallback(() => {
