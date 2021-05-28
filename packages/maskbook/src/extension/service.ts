@@ -32,6 +32,7 @@ export const Services = {
     Helper: add(() => import('./background-script/HelperService'), 'Helper'),
     Provider: add(() => import('./background-script/ProviderService'), 'Provider'),
     Ethereum: add(() => import('./background-script/EthereumService'), 'Ethereum'),
+    UnlockProtocol: add(() => import('./background-script/UnlockProtocolService'), 'UnlockProtocol'),
     SocialNetwork: add(() => import('./background-script/SocialNetworkService'), 'SocialNetwork'),
     Settings: add(() => import('./background-script/SettingsService'), 'Settings'),
 }
@@ -49,6 +50,7 @@ if (module.hot && isEnvironment(Environment.ManifestBackground)) {
             './background-script/HelperService',
             './background-script/ProviderService',
             './background-script/EthereumService',
+            './background-script/UnlockProtocolService',
             './background-script/SettingsService',
             './background-script/SocialNetworkService',
             './service-generator',
