@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import {
     makeStyles,
-    createStyles,
     DialogContent,
     DialogProps,
     Typography,
@@ -18,6 +17,7 @@ import {
 import AddIcon from '@material-ui/icons/Add'
 import { add as addDate } from 'date-fns'
 import { usePortalShadowRoot } from '@dimensiondev/maskbook-shared'
+import { useI18N } from '../../../utils'
 import { useStylesExtends } from '../../../components/custom-ui-helper'
 import AbstractTab, { AbstractTabProps } from '../../../extension/options-page/DashboardComponents/AbstractTab'
 import { editActivatedPostMetadata } from '../../../protocols/typed-message/global-state'
@@ -26,48 +26,45 @@ import type { PollGunDB } from '../Services'
 import { PollCardUI } from './Polls'
 import type { PollMetaData } from '../types'
 import { POLL_META_KEY_1 } from '../constants'
-import { useI18N } from '../../../utils/i18n-next-ui'
 import { InjectedDialog } from '../../../components/shared/InjectedDialog'
 import { PluginPollRPC } from '../utils'
 
-const useNewPollStyles = makeStyles((theme) =>
-    createStyles({
-        line: {
-            display: 'flex',
-            margin: theme.spacing(1),
+const useNewPollStyles = makeStyles((theme) => ({
+    line: {
+        display: 'flex',
+        margin: theme.spacing(1),
+    },
+    item: {
+        flex: 1,
+        margin: theme.spacing(1),
+    },
+    pollWrap: {
+        border: '1px solid #ccd6dd',
+        borderRadius: '10px',
+        margin: theme.spacing(1),
+        padding: theme.spacing(1),
+    },
+    optionsWrap: {
+        position: 'relative',
+        '& >div': {
+            width: '80%',
+            margin: theme.spacing(2),
         },
-        item: {
-            flex: 1,
-            margin: theme.spacing(1),
-        },
-        pollWrap: {
-            border: '1px solid #ccd6dd',
-            borderRadius: '10px',
-            margin: theme.spacing(1),
-            padding: theme.spacing(1),
-        },
-        optionsWrap: {
-            position: 'relative',
-            '& >div': {
-                width: '80%',
-                margin: theme.spacing(2),
-            },
-        },
-        addButton: {
-            position: 'absolute',
-            bottom: '0',
-            right: '10px',
-        },
-        loading: {
-            position: 'absolute',
-            left: '50%',
-            top: '50%',
-        },
-        whiteColor: {
-            color: '#fff',
-        },
-    }),
-)
+    },
+    addButton: {
+        position: 'absolute',
+        bottom: '0',
+        right: '10px',
+    },
+    loading: {
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+    },
+    whiteColor: {
+        color: '#fff',
+    },
+}))
 
 interface NewPollProps {
     loading: [boolean, React.Dispatch<React.SetStateAction<boolean>>]
@@ -123,6 +120,7 @@ function NewPollUI(props: PollsDialogProps & NewPollProps) {
 
         return usePortalShadowRoot((container) => (
             <Select
+                variant="standard"
                 MenuProps={{ container: props.DialogProps?.container ?? container }}
                 value={defaultIndex}
                 onChange={(e) => fn(e.target.value as number)}>
@@ -137,7 +135,7 @@ function NewPollUI(props: PollsDialogProps & NewPollProps) {
 
     return (
         <>
-            <FormControl className={classes.line}>
+            <FormControl variant="standard" className={classes.line}>
                 <TextField
                     label={t('plugin_poll_question_hint')}
                     variant="filled"
@@ -149,7 +147,7 @@ function NewPollUI(props: PollsDialogProps & NewPollProps) {
             <div className={classes.pollWrap}>
                 <div className={classes.optionsWrap}>
                     {options.map((option, index) => (
-                        <FormControl className={classes.line} key={index}>
+                        <FormControl variant="standard" className={classes.line} key={index}>
                             <TextField
                                 label={`${t('plugin_poll_options_hint')}${index + 1}`}
                                 variant="filled"
@@ -236,7 +234,7 @@ function ExistingPollsUI(props: PollsDialogProps & ExistingPollsProps) {
 }
 
 const useStyles = makeStyles((theme) => {
-    createStyles({
+    ;({
         title: {
             marginLeft: 6,
         },

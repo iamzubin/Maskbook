@@ -1,15 +1,17 @@
-import { Box, Paper, createStyles, Link, makeStyles, Typography } from '@material-ui/core'
+import { Box, Paper, Link, makeStyles, Typography } from '@material-ui/core'
+import { useI18N } from '../../../utils'
 import { CollectibleTab } from './CollectibleTab'
 import { CollectibleState } from '../hooks/useCollectibleState'
-import { useI18N } from '../../../utils/i18n-next-ui'
-import { formatEthereumAddress } from '../../Wallet/formatter'
-import { resolveAddressLinkOnEtherscan, resolveChainName } from '../../../web3/pipes'
+import { FormattedAddress } from '@dimensiondev/maskbook-shared'
+import { resolveAddressLinkOnExplorer, resolveChainName } from '../../../web3/pipes'
 import { ChainId } from '../../../web3/types'
 import { Markdown } from '../../Snapshot/UI/Markdown'
-import { useChainId } from '../../../web3/hooks/useBlockNumber'
+import { Account } from './Account'
+import { resolveTraitLinkOnOpenSea } from '../pipes'
+import { useChainId } from '../../../web3/hooks/useChainId'
 
 const useStyles = makeStyles((theme) => {
-    return createStyles({
+    return {
         content: {
             paddingTop: 0,
             paddingBottom: '0 !important',
@@ -51,7 +53,7 @@ const useStyles = makeStyles((theme) => {
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
         },
-    })
+    }
 })
 
 export interface TokenTabProps {}
@@ -74,14 +76,20 @@ export function TokenTab(props: TokenTabProps) {
                     <Typography variant="body2">
                         {t('plugin_collectible_create_by')}{' '}
                         <Link href={asset.value.creator.link} target="_blank" rel="noopener noreferrer">
-                            {asset.value.creator.user?.username ?? asset.value.creator.address?.slice(2, 8)}
+                            <Account
+                                address={asset.value.creator.address}
+                                username={asset.value.creator.user?.username}
+                            />
                         </Link>
                     </Typography>
                 ) : asset.value.owner ? (
                     <Typography variant="body2">
                         {t('plugin_collectible_owned_by')}{' '}
                         <Link href={asset.value.owner.link} target="_blank" rel="noopener noreferrer">
-                            {asset.value.owner?.user?.username ?? asset.value.owner?.address?.slice(2, 8) ?? ''}
+                            <Account
+                                address={asset.value.owner?.user?.username}
+                                username={asset.value.owner?.address}
+                            />
                         </Link>
                     </Typography>
                 ) : null}
@@ -97,12 +105,23 @@ export function TokenTab(props: TokenTabProps) {
                     <Box className={classes.trait_content}>
                         {asset.value.traits.map(({ trait_type, value }) => {
                             return (
-                                <Paper className={classes.trait} key={trait_type + value} variant="outlined">
-                                    <Typography variant="body2" color="primary">
-                                        {trait_type}
-                                    </Typography>
-                                    <Typography variant="body2">{value}</Typography>
-                                </Paper>
+                                <Link
+                                    underline="none"
+                                    key={trait_type + value}
+                                    href={
+                                        asset.value?.slug
+                                            ? resolveTraitLinkOnOpenSea(chainId, asset.value.slug, trait_type, value)
+                                            : ''
+                                    }
+                                    target="_blank"
+                                    rel="noopener noreferrer">
+                                    <Paper className={classes.trait} variant="outlined">
+                                        <Typography variant="body2" color="primary">
+                                            {trait_type}
+                                        </Typography>
+                                        <Typography variant="body2">{value}</Typography>
+                                    </Paper>
+                                </Link>
                             )
                         })}
                     </Box>
@@ -128,11 +147,11 @@ export function TokenTab(props: TokenTabProps) {
                 <Box className={classes.chain_row}>
                     <Typography variant="body2">{t('plugin_collectible_contract_address')}</Typography>
                     <Link
-                        href={resolveAddressLinkOnEtherscan(ChainId.Mainnet, token?.contractAddress ?? '')}
+                        href={resolveAddressLinkOnExplorer(ChainId.Mainnet, token?.contractAddress ?? '')}
                         target="_blank"
                         rel="noopener noreferrer">
                         <Typography variant="body2">
-                            {formatEthereumAddress(token?.contractAddress ?? '', 4)}
+                            <FormattedAddress address={token?.contractAddress ?? ''} size={4} />
                         </Typography>
                     </Link>
                 </Box>

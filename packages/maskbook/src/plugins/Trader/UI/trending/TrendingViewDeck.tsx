@@ -1,29 +1,17 @@
 import { useCallback } from 'react'
-import {
-    Avatar,
-    Button,
-    CardContent,
-    CardHeader,
-    createStyles,
-    IconButton,
-    makeStyles,
-    Paper,
-    Typography,
-} from '@material-ui/core'
+import { Avatar, Button, CardContent, CardHeader, IconButton, makeStyles, Paper, Typography } from '@material-ui/core'
 import MonetizationOnOutlinedIcon from '@material-ui/icons/MonetizationOnOutlined'
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
 import stringify from 'json-stable-stringify'
 import { first, last } from 'lodash-es'
+import { FormattedCurrency } from '@dimensiondev/maskbook-shared'
+import { useRemoteControlledDialog, useI18N, useValueRef, Flags } from '../../../../utils'
 import { Coin, Currency, DataProvider, Stat, TradeProvider, Trending } from '../../types'
-import { formatCurrency } from '../../../Wallet/formatter'
 import { PriceChanged } from './PriceChanged'
 import { Linking } from './Linking'
-import { useI18N } from '../../../../utils/i18n-next-ui'
 import { TrendingCard, TrendingCardProps } from './TrendingCard'
-import { useRemoteControlledDialog } from '../../../../utils/hooks/useRemoteControlledDialog'
 import { PluginTransakMessages } from '../../../Transak/messages'
 import { useAccount } from '../../../../web3/hooks/useAccount'
-import { Flags } from '../../../../utils/flags'
 import { TokenIcon } from '../../../../extension/options-page/DashboardComponents/TokenIcon'
 import { useStylesExtends } from '../../../../components/custom-ui-helper'
 import type { FootnoteMenuOption } from '../trader/FootnoteMenu'
@@ -34,13 +22,12 @@ import {
     getCurrentPreferredCoinIdSettings,
 } from '../../settings'
 import { CoinMenu, CoinMenuOption } from './CoinMenu'
-import { useValueRef } from '../../../../utils/hooks/useValueRef'
 import { useTransakAllowanceCoin } from '../../../Transak/hooks/useTransakAllowanceCoin'
 import { useApprovedTokens } from '../../trending/useApprovedTokens'
 import { CoinSaftyAlert } from './CoinSaftyAlert'
 
 const useStyles = makeStyles((theme) => {
-    return createStyles({
+    return {
         root: {
             width: '100%',
             boxShadow: 'none',
@@ -105,7 +92,7 @@ const useStyles = makeStyles((theme) => {
             width: 40,
             height: 10,
         },
-    })
+    }
 })
 
 export interface TrendingViewDeckProps extends withClasses<'header' | 'body' | 'footer' | 'content'> {
@@ -146,10 +133,10 @@ export function TrendingViewDeck(props: TrendingViewDeckProps) {
     //#region buy
     const account = useAccount()
     const isAllowanceCoin = useTransakAllowanceCoin(coin)
-    const [, setBuyDialogOpen] = useRemoteControlledDialog(PluginTransakMessages.events.buyTokenDialogUpdated)
+    const { setDialog: setBuyDialog } = useRemoteControlledDialog(PluginTransakMessages.events.buyTokenDialogUpdated)
 
     const onBuyButtonClicked = useCallback(() => {
-        setBuyDialogOpen({
+        setBuyDialog({
             open: true,
             code: coin.symbol,
             address: account,
@@ -243,12 +230,14 @@ export function TrendingViewDeck(props: TrendingViewDeckProps) {
                                         </span>
                                     ) : null}
                                     <span>
-                                        {formatCurrency(
-                                            (dataProvider === DataProvider.COIN_MARKET_CAP
-                                                ? last(stats)?.[1] ?? market.current_price
-                                                : market.current_price) ?? 0,
-                                            currency.symbol,
-                                        )}
+                                        <FormattedCurrency
+                                            value={
+                                                (dataProvider === DataProvider.COIN_MARKET_CAP
+                                                    ? last(stats)?.[1] ?? market.current_price
+                                                    : market.current_price) ?? 0
+                                            }
+                                            sign={currency.symbol}
+                                        />
                                     </span>
                                 </>
                             ) : (
@@ -270,6 +259,9 @@ export function TrendingViewDeck(props: TrendingViewDeckProps) {
             </CardContent>
 
             <TradeFooter
+                classes={{
+                    footer: classes.footer,
+                }}
                 showDataProviderIcon={showDataProviderIcon}
                 showTradeProviderIcon={showTradeProviderIcon}
                 dataProvider={dataProvider}

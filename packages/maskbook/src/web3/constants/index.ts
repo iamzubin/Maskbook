@@ -20,7 +20,7 @@ export const CONSTANTS = {
         ],
         [ChainId.Ropsten]: ['https://dimensiondev.github.io/Mask-Token-List/mask.json'],
         [ChainId.Rinkeby]: ['https://dimensiondev.github.io/Mask-Token-List/mask.json'],
-        [ChainId.Kovan]: [],
+        [ChainId.Kovan]: ['https://irhonin.github.io/kovan-token-list/kovan-token-list.json'],
         [ChainId.Gorli]: [],
     },
 
@@ -195,7 +195,7 @@ export const CONSTANTS = {
         [ChainId.Kovan]: '',
         [ChainId.Gorli]: '',
     },
-    ETH_ADDRESS: {
+    NATIVE_TOKEN_ADDRESS: {
         [ChainId.Mainnet]: '0x0000000000000000000000000000000000000000',
         [ChainId.Ropsten]: '0x0000000000000000000000000000000000000000',
         [ChainId.Rinkeby]: '0x0000000000000000000000000000000000000000',
@@ -228,10 +228,17 @@ export const CONSTANTS = {
         [ChainId.Mainnet]:
             process.env.NODE_ENV === 'development'
                 ? [0, 0, 0, 0] // 0 - 100%
-                : [0, 0, 1, 2], // 0 - 50%, 1 - 25%, 2 - 25%
+                : [0, 1, 1, 2], // 0 - 25%, 1 - 50%, 2 - 25%
         [ChainId.Ropsten]: [0, 0, 0, 0], // 0 - 100%
         [ChainId.Rinkeby]: [0, 0, 0, 0], // 0 - 100%
         [ChainId.Kovan]: [0, 0, 0, 0], // 0 - 100%
         [ChainId.Gorli]: [0, 0, 0, 0], // 0 - 100%
+    },
+    PROVIDER_WEIGHT_SEED: {
+        [ChainId.Mainnet]: Math.floor(Math.random() * 4), // 4 is the length of weights
+        [ChainId.Ropsten]: Math.floor(Math.random() * 4),
+        [ChainId.Rinkeby]: Math.floor(Math.random() * 4),
+        [ChainId.Kovan]: Math.floor(Math.random() * 4),
+        [ChainId.Gorli]: Math.floor(Math.random() * 4),
     },
 }

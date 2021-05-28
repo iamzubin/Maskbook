@@ -1,44 +1,42 @@
 import { useMemo } from 'react'
 
 import { Card, List, ListItem, ListItemIcon, ListItemText, Paper } from '@material-ui/core'
-import { createStyles, makeStyles, useTheme } from '@material-ui/core/styles'
+import { makeStyles, useTheme } from '@material-ui/core/styles'
 import DescriptionIcon from '@material-ui/icons/Description'
 import FingerprintIcon from '@material-ui/icons/Fingerprint'
 
-import { useI18N } from '../../../utils/i18n-next-ui'
+import { useI18N } from '../../../utils'
 
 import { DashboardDialogCore, DashboardDialogWrapper, WrappedDialogProps } from './Base'
 import { DebounceButton } from '../DashboardComponents/ActionButton'
 import type { PluginConfig } from '../../../plugins/types'
 
-const useStyles = makeStyles((theme) =>
-    createStyles({
-        logo: {
-            fontSize: 30,
+const useStyles = makeStyles((theme) => ({
+    logo: {
+        fontSize: 30,
+    },
+    section: {
+        padding: '26px 0',
+        margin: theme.spacing(3, 0),
+        [theme.breakpoints.down('sm')]: {
+            padding: theme.spacing(2, 0),
         },
-        section: {
-            padding: '26px 0',
-            margin: theme.spacing(3, 0),
-            [theme.breakpoints.down('sm')]: {
-                padding: theme.spacing(2, 0),
-            },
+    },
+    list: {
+        [theme.breakpoints.down('sm')]: {
+            marginLeft: theme.spacing(-2),
+            marginRight: theme.spacing(-2),
         },
-        list: {
-            [theme.breakpoints.down('sm')]: {
-                marginLeft: theme.spacing(-2),
-                marginRight: theme.spacing(-2),
-            },
-        },
-        listItemRoot: {
-            paddingTop: theme.spacing(1.5),
-            paddingBottom: theme.spacing(1.5),
-            borderBottom: `1px solid ${theme.palette.divider}`,
-        },
-        listItemText: {
-            fontWeight: 500,
-        },
-    }),
-)
+    },
+    listItemRoot: {
+        paddingTop: theme.spacing(1.5),
+        paddingBottom: theme.spacing(1.5),
+        borderBottom: `1px solid ${theme.palette.divider}`,
+    },
+    listItemText: {
+        fontWeight: 500,
+    },
+}))
 
 interface PluginProps {
     plugin: PluginConfig

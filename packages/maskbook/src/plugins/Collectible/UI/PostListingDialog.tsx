@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { createStyles, makeStyles, DialogContent, Tab, Tabs } from '@material-ui/core'
+import { makeStyles, DialogContent, Tab, Tabs } from '@material-ui/core'
+import { useI18N } from '../../../utils'
 import { InjectedDialog } from '../../../components/shared/InjectedDialog'
-import { useI18N } from '../../../utils/i18n-next-ui'
 import { ChainState } from '../../../web3/state/useChainState'
 import { ListingByPriceCard } from './ListingByPriceCard'
 import { ListingByHighestBidCard } from './ListingByHighestBidCard'
@@ -10,7 +10,7 @@ import { useTokenWatched } from '../../../web3/hooks/useTokenWatched'
 import { first } from 'lodash-es'
 
 const useStyles = makeStyles((theme) => {
-    return createStyles({
+    return {
         content: {
             padding: 0,
         },
@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => {
         button: {
             marginTop: theme.spacing(1.5),
         },
-    })
+    }
 })
 
 export interface PostListingDialogProps {
@@ -45,12 +45,20 @@ export function PostListingDialog(props: PostListingDialogProps) {
     const tokenWatched = useTokenWatched(selectedPaymentToken)
 
     const [tabIndex, setTabIndex] = useState(0)
-    const tabs = [<Tab key="price" label="Set Price" />, <Tab key="bid" label="Highest Bid" />]
+    const tabs = [
+        <Tab key="price" label={t('plugin_collectible_set_price')} />,
+        <Tab key="bid" label={t('plugin_collectible_highest_bid')} />,
+    ]
 
     return (
-        <InjectedDialog title="Post Listing" open={open} onClose={onClose} DialogProps={{ maxWidth: 'md' }}>
+        <InjectedDialog
+            title={t('plugin_collectible_post_listing')}
+            open={open}
+            onClose={onClose}
+            DialogProps={{ maxWidth: 'md' }}>
             <DialogContent className={classes.content}>
                 <Tabs
+                    indicatorColor="primary"
                     textColor="primary"
                     variant="fullWidth"
                     value={tabIndex}

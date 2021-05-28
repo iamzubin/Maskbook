@@ -1,6 +1,5 @@
 import { ChangeEvent, useState, useCallback, useMemo } from 'react'
 import {
-    createStyles,
     makeStyles,
     DialogContent,
     Box,
@@ -15,18 +14,17 @@ import {
 import { useSnackbar } from 'notistack'
 import { InjectedDialog } from '../../../components/shared/InjectedDialog'
 import { UnreviewedWarning } from './UnreviewedWarning'
-import { useI18N } from '../../../utils/i18n-next-ui'
+import { useI18N, useRemoteControlledDialog } from '../../../utils'
 import ActionButton, { ActionButtonPromise } from '../../../extension/options-page/DashboardComponents/ActionButton'
 import { EthereumWalletConnectedBoundary } from '../../../web3/UI/EthereumWalletConnectedBoundary'
 import type { useAsset } from '../hooks/useAsset'
 import { PluginCollectibleRPC } from '../messages'
 import { ChainState } from '../../../web3/state/useChainState'
-import { useRemoteControlledDialogEvent } from '../../../utils/hooks/useRemoteControlledDialog'
 import { PluginTraderMessages } from '../../Trader/messages'
 import { CheckoutOrder } from './CheckoutOrder'
-
+import { Trans } from 'react-i18next'
 const useStyles = makeStyles((theme) => {
-    return createStyles({
+    return {
         content: {
             padding: 0,
         },
@@ -50,7 +48,7 @@ const useStyles = makeStyles((theme) => {
             flex: 1,
             margin: `${theme.spacing(1.5)} ${theme.spacing(0.5)} 0`,
         },
-    })
+    }
 })
 
 export interface CheckoutDialogProps {
@@ -92,11 +90,11 @@ export function CheckoutDialog(props: CheckoutDialogProps) {
         }
     }, [asset?.value, account, enqueueSnackbar])
 
-    const { onOpen: openSwapDialog } = useRemoteControlledDialogEvent(PluginTraderMessages.events.swapDialogUpdated)
+    const { openDialog: openSwapDialog } = useRemoteControlledDialog(PluginTraderMessages.events.swapDialogUpdated)
 
     const validationMessage = useMemo(() => {
-        if (!isVerified && !unreviewedChecked) return 'Please ensure unreviewed item'
-        if (!isVerified && !ToS_Checked) return 'Please check ToS document'
+        if (!isVerified && !unreviewedChecked) return t('plugin_collectible_ensure_unreviewed_item')
+        if (!isVerified && !ToS_Checked) return t('plugin_collectible_check_tos_document')
         return ''
     }, [isVerified, unreviewedChecked, ToS_Checked])
 
@@ -127,8 +125,7 @@ export function CheckoutDialog(props: CheckoutDialogProps) {
                                         }
                                         label={
                                             <Typography variant="body2">
-                                                By checking this box, I acknowledge that this item has not been reviewd
-                                                or approved by OpenSea.
+                                                {t('plugin_collectible_approved_tips')}
                                             </Typography>
                                         }
                                     />
@@ -145,15 +142,19 @@ export function CheckoutDialog(props: CheckoutDialogProps) {
                                         }
                                         label={
                                             <Typography variant="body2">
-                                                By checking this box, I agree to OpenSea's{' '}
-                                                <Link
-                                                    color="primary"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    href="https://opensea.io/tos">
-                                                    Terms of Service
-                                                </Link>
-                                                .
+                                                <Trans
+                                                    i18nKey="plugin_collectible_agree_terms"
+                                                    components={{
+                                                        terms: (
+                                                            <Link
+                                                                color="primary"
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                href="https://opensea.io/tos"
+                                                            />
+                                                        ),
+                                                    }}
+                                                />
                                             </Typography>
                                         }
                                     />
@@ -183,7 +184,7 @@ export function CheckoutDialog(props: CheckoutDialogProps) {
                                         variant="contained"
                                         size="large"
                                         onClick={openSwapDialog}>
-                                        Convert ETH
+                                        {t('plugin_collectible_convert_eth')}
                                     </ActionButton>
                                 ) : null}
                             </Box>

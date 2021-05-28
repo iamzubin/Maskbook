@@ -1,28 +1,26 @@
 import { Fragment, useCallback, useEffect, useState } from 'react'
-import { makeStyles, createStyles, InputAdornment } from '@material-ui/core'
+import { makeStyles, InputAdornment } from '@material-ui/core'
 import { v4 as uuid } from 'uuid'
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward'
-import type { ERC20TokenDetailed, EtherTokenDetailed } from '../../../web3/types'
+import type { FungibleTokenDetailed } from '../../../web3/types'
+import { useI18N } from '../../../utils'
 import { ITO_EXCHANGE_RATION_MAX } from '../constants'
 import {
     ExchangeTokenAndAmountState,
     ExchangeTokenAndAmountActionType,
     useExchangeTokenAndAmount,
 } from '../hooks/useExchangeTokenAmountstate'
-import { useI18N } from '../../../utils/i18n-next-ui'
 import { ExchangeTokenPanel } from './ExchangeTokenPanel'
 
-const useStyles = makeStyles((theme) =>
-    createStyles({
-        arrow: {
-            display: 'flex',
-            justifyContent: 'center',
-        },
-    }),
-)
+const useStyles = makeStyles((theme) => ({
+    arrow: {
+        display: 'flex',
+        justifyContent: 'center',
+    },
+}))
 
 export interface ExchangeTokenPanelGroupProps {
-    token: EtherTokenDetailed | ERC20TokenDetailed | undefined
+    token: FungibleTokenDetailed | undefined
     origin: ExchangeTokenAndAmountState[]
     onTokenAmountChange: (data: ExchangeTokenAndAmountState[]) => void
 }
@@ -56,7 +54,7 @@ export function ExchangeTokenPanelGroup(props: ExchangeTokenPanelGroupProps) {
     )
 
     const onTokenChange = useCallback(
-        (token: EtherTokenDetailed | ERC20TokenDetailed, key: string) => {
+        (token: FungibleTokenDetailed, key: string) => {
             dispatchExchangeTokenArray({
                 type: ExchangeTokenAndAmountActionType.UPDATE_TOKEN,
                 token,

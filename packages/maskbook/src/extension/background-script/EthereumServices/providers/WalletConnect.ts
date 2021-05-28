@@ -9,8 +9,8 @@ import type { IJsonRpcRequest } from '@walletconnect/types'
 import type { ITxData } from '@walletconnect/types'
 import * as Maskbook from '../providers/Maskbook'
 import { updateExoticWalletFromSource } from '../../../../plugins/Wallet/services'
-import { currentWalletConnectChainIdSettings } from '../../../../settings/settings'
 import {
+    currentWalletConnectChainIdSettings,
     currentSelectedWalletAddressSettings,
     currentSelectedWalletProviderSettings,
 } from '../../../../plugins/Wallet/settings'
@@ -82,7 +82,7 @@ function hijackETH(eth: Eth) {
                                     .forEach((y) => y.listener(e))
                             })
 
-                        return (promise as unknown) as PromiEventW3<string>
+                        return promise as unknown as PromiEventW3<string>
                     }
                 default:
                     return Reflect.get(target, name)
@@ -142,9 +142,9 @@ function hijackPersonal(personal: Personal) {
 
 // Wrap promise as PromiEvent because WalletConnect returns transaction hash only
 // docs: https://docs.walletconnect.org/client-api
-export function createWeb3() {
+export function createWeb3(chainId = currentWalletConnectChainIdSettings.value) {
     const web3 = Maskbook.createWeb3({
-        chainId: currentWalletConnectChainIdSettings.value,
+        chainId,
     })
     return Object.assign(web3, {
         eth: hijackETH(web3.eth),
@@ -199,11 +199,11 @@ const onDisconnect = async (error: Error | null) => {
 }
 
 async function updateWalletInDB(address: string, name: string = 'WalletConnect', setAsDefault: boolean = false) {
-    const provider_ = currentSelectedWalletProviderSettings.value
+    const providerType = currentSelectedWalletProviderSettings.value
 
     // validate address
     if (!EthereumAddress.isValid(address)) {
-        if (provider_ === ProviderType.WalletConnect) currentSelectedWalletAddressSettings.value = ''
+        if (providerType === ProviderType.WalletConnect) currentSelectedWalletAddressSettings.value = ''
         return
     }
 
@@ -214,5 +214,6 @@ async function updateWalletInDB(address: string, name: string = 'WalletConnect',
     if (setAsDefault) currentSelectedWalletProviderSettings.value = ProviderType.WalletConnect
 
     // update the selected wallet address
-    if (setAsDefault || provider_ === ProviderType.WalletConnect) currentSelectedWalletAddressSettings.value = address
+    if (setAsDefault || providerType === ProviderType.WalletConnect)
+        currentSelectedWalletAddressSettings.value = address
 }

@@ -1,5 +1,6 @@
 import type { FC } from 'react'
-import { CardActions, createStyles, Link, makeStyles, Typography } from '@material-ui/core'
+import { CardActions, Link, makeStyles, Typography } from '@material-ui/core'
+import { useStylesExtends } from '../../../../components/custom-ui-helper'
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
 import { MaskbookTextIcon } from '../../../../resources/MaskbookIcon'
 import { getEnumAsArray } from '../../../../utils/enum'
@@ -9,9 +10,10 @@ import { findIndex } from 'lodash-es'
 import { DataProviderIcon } from '../trader/DataProviderIcon'
 import { TradeProviderIcon } from '../trader/TradeProviderIcon'
 import { FootnoteMenu, FootnoteMenuOption } from '../trader/FootnoteMenu'
+import { useI18N } from '../../../../utils'
 
 const useStyles = makeStyles((theme) => {
-    return createStyles({
+    return {
         footer: {
             justifyContent: 'space-between',
         },
@@ -40,10 +42,10 @@ const useStyles = makeStyles((theme) => {
             width: 40,
             height: 10,
         },
-    })
+    }
 })
 
-export interface TradeFooterProps {
+export interface TradeFooterProps extends withClasses<'footer'> {
     showDataProviderIcon?: boolean
     showTradeProviderIcon?: boolean
     dataProvider?: DataProvider
@@ -54,17 +56,19 @@ export interface TradeFooterProps {
     onTradeProviderChange?: (option: FootnoteMenuOption) => void
 }
 
-export const TradeFooter: FC<TradeFooterProps> = ({
-    showDataProviderIcon = false,
-    showTradeProviderIcon = false,
-    dataProvider,
-    tradeProvider,
-    dataProviders = [],
-    tradeProviders = [],
-    onDataProviderChange,
-    onTradeProviderChange,
-}) => {
-    const classes = useStyles()
+export const TradeFooter: FC<TradeFooterProps> = (props) => {
+    const {
+        showDataProviderIcon = false,
+        showTradeProviderIcon = false,
+        dataProvider,
+        tradeProvider,
+        dataProviders = [],
+        tradeProviders = [],
+        onDataProviderChange,
+        onTradeProviderChange,
+    } = props
+    const { t } = useI18N()
+    const classes = useStylesExtends(useStyles(), props)
     const dataProviderOptions = showDataProviderIcon
         ? getEnumAsArray(DataProvider).filter((x) => dataProviders.includes(x.value))
         : []
@@ -74,7 +78,7 @@ export const TradeFooter: FC<TradeFooterProps> = ({
     return (
         <CardActions className={classes.footer}>
             <Typography className={classes.footnote} variant="subtitle2">
-                <span>Powered by </span>
+                <span>{t('plugin_powered_by')} </span>
                 <Link
                     className={classes.footLink}
                     color="textSecondary"

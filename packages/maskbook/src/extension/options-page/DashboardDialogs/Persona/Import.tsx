@@ -3,8 +3,8 @@ import { useSnackbar } from 'notistack'
 import { useState } from 'react'
 import { UserCheck } from 'react-feather'
 import { useHistory } from 'react-router-dom'
+import { useI18N } from '../../../../utils'
 import type { Persona } from '../../../../database'
-import { useI18N } from '../../../../utils/i18n-next-ui'
 import Services from '../../../service'
 import AbstractTab, { AbstractTabProps } from '../../DashboardComponents/AbstractTab'
 import { DebounceButton } from '../../DashboardComponents/ActionButton'
@@ -90,9 +90,9 @@ export function DashboardImportPersonaDialog(props: WrappedDialogProps) {
                 label: 'Base64',
                 children: (
                     <TextField
-                        inputProps={{ style: { height: 147 } }}
                         multiline
-                        minRows={1}
+                        minRows={5}
+                        maxRows={5}
                         autoFocus
                         placeholder={t('dashboard_paste_database_base64_hint')}
                         onChange={(e) => setBase64Value(e.target.value)}

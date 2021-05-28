@@ -3,17 +3,17 @@ import { v4 as uuid } from 'uuid'
 import { useRemoteControlledDialog } from '../../../utils/hooks/useRemoteControlledDialog'
 import { SelectTokenDialogEvent, WalletMessages } from '../../Wallet/messages'
 import { TokenAmountPanel, TokenAmountPanelProps } from '../../../web3/UI/TokenAmountPanel'
-import type { ERC20TokenDetailed, EtherTokenDetailed } from '../../../web3/types'
+import type { FungibleTokenDetailed } from '../../../web3/types'
 import type { FixedTokenListProps } from '../../../extension/options-page/DashboardComponents/FixedTokenList'
 
 export interface SelectTokenAmountPanelProps {
     amount: string
     balance: string
-    token?: EtherTokenDetailed | ERC20TokenDetailed
-    disableEther?: boolean
+    token?: FungibleTokenDetailed
+    disableNativeToken?: boolean
     disableSearchBar?: boolean
     onAmountChange: (amount: string) => void
-    onTokenChange: (token: EtherTokenDetailed | ERC20TokenDetailed) => void
+    onTokenChange: (token: FungibleTokenDetailed) => void
     FixedTokenListProps?: Partial<FixedTokenListProps>
     TokenAmountPanelProps?: Partial<TokenAmountPanelProps>
 }
@@ -23,7 +23,7 @@ export function SelectTokenAmountPanel(props: SelectTokenAmountPanelProps) {
         amount,
         balance,
         token,
-        disableEther = false,
+        disableNativeToken = false,
         disableSearchBar = false,
         onAmountChange,
         onTokenChange,
@@ -33,7 +33,7 @@ export function SelectTokenAmountPanel(props: SelectTokenAmountPanelProps) {
 
     //#region select token
     const [id] = useState(uuid())
-    const [, setSelectTokenDialogOpen] = useRemoteControlledDialog(
+    const { setDialog: setSelectTokenDialog } = useRemoteControlledDialog(
         WalletMessages.events.selectTokenDialogUpdated,
         useCallback(
             (ev: SelectTokenDialogEvent) => {
@@ -44,14 +44,14 @@ export function SelectTokenAmountPanel(props: SelectTokenAmountPanelProps) {
         ),
     )
     const onSelectTokenChipClick = useCallback(() => {
-        setSelectTokenDialogOpen({
+        setSelectTokenDialog({
             open: true,
             uuid: id,
-            disableEther,
+            disableNativeToken,
             disableSearchBar,
             FixedTokenListProps,
         })
-    }, [id, disableEther, disableSearchBar, FixedTokenListProps])
+    }, [id, disableNativeToken, disableSearchBar, FixedTokenListProps])
     //#endregion
 
     return (

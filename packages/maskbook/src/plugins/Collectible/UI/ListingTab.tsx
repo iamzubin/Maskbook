@@ -1,27 +1,17 @@
 import { useMemo } from 'react'
-import {
-    Button,
-    createStyles,
-    makeStyles,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableRow,
-    Typography,
-} from '@material-ui/core'
+import { Button, makeStyles, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@material-ui/core'
 import BigNumber from 'bignumber.js'
+import { useI18N } from '../../../utils'
 import { CollectibleState } from '../hooks/useCollectibleState'
 import { CollectibleTab } from './CollectibleTab'
 import { OrderRow } from './OrderRow'
 import { TableListPagination } from './Pagination'
-import { useI18N } from '../../../utils/i18n-next-ui'
 import { CollectibleProvider } from '../types'
 import { LoadingTable } from './LoadingTable'
 import { ChainState } from '../../../web3/state/useChainState'
 
 const useStyles = makeStyles((theme) => {
-    return createStyles({
+    return {
         root: {
             overflow: 'auto',
         },
@@ -42,7 +32,7 @@ const useStyles = makeStyles((theme) => {
         button: {
             marginLeft: theme.spacing(1),
         },
-    })
+    }
 })
 
 export function ListingTab() {

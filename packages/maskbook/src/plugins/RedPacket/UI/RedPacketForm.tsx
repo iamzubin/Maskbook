@@ -1,31 +1,22 @@
 import { useState, useCallback, useMemo, ChangeEvent, useEffect } from 'react'
-import {
-    makeStyles,
-    FormControl,
-    TextField,
-    createStyles,
-    InputLabel,
-    Select,
-    MenuItem,
-    MenuProps,
-} from '@material-ui/core'
+import { makeStyles, FormControl, TextField, InputLabel, Select, MenuItem, MenuProps } from '@material-ui/core'
 import { omit } from 'lodash-es'
 import { v4 as uuid } from 'uuid'
 import BigNumber from 'bignumber.js'
 
+import { formatBalance } from '@dimensiondev/maskbook-shared'
+import { useI18N, useRemoteControlledDialog } from '../../../utils'
 import { useStylesExtends } from '../../../components/custom-ui-helper'
 import { useCurrentIdentity } from '../../../components/DataSource/useActivatedUI'
-import { formatBalance } from '../../Wallet/formatter'
 import {
     RED_PACKET_MIN_SHARES,
     RED_PACKET_MAX_SHARES,
     RED_PACKET_CONSTANTS,
     RED_PACKET_DEFAULT_SHARES,
 } from '../constants'
-import { useI18N } from '../../../utils/i18n-next-ui'
-import { EthereumTokenType, EthereumNetwork, ERC20TokenDetailed, EtherTokenDetailed } from '../../../web3/types'
+import { EthereumTokenType, EthereumNetwork, FungibleTokenDetailed } from '../../../web3/types'
 import { useAccount } from '../../../web3/hooks/useAccount'
-import { useChainId, useChainIdValid } from '../../../web3/hooks/useBlockNumber'
+import { useChainId } from '../../../web3/hooks/useChainId'
 import { TokenAmountPanel } from '../../../web3/UI/TokenAmountPanel'
 import { useConstant } from '../../../web3/hooks/useConstant'
 import { useCreateCallback } from '../hooks/useCreateCallback'
@@ -34,38 +25,35 @@ import { TransactionStateType } from '../../../web3/hooks/useTransactionState'
 import type { RedPacketJSONPayload } from '../types'
 import { resolveChainName } from '../../../web3/pipes'
 import { SelectTokenDialogEvent, WalletMessages } from '../../Wallet/messages'
-import { useRemoteControlledDialog } from '../../../utils/hooks/useRemoteControlledDialog'
-import { useEtherTokenDetailed } from '../../../web3/hooks/useEtherTokenDetailed'
+import { useNativeTokenDetailed } from '../../../web3/hooks/useNativeTokenDetailed'
 import { useTokenBalance } from '../../../web3/hooks/useTokenBalance'
 import { EthereumMessages } from '../../Ethereum/messages'
 import { EthereumWalletConnectedBoundary } from '../../../web3/UI/EthereumWalletConnectedBoundary'
 import { EthereumERC20TokenApprovedBoundary } from '../../../web3/UI/EthereumERC20TokenApprovedBoundary'
 
-const useStyles = makeStyles((theme) =>
-    createStyles({
-        line: {
-            display: 'flex',
-            margin: theme.spacing(1),
-        },
-        input: {
-            flex: 1,
-            padding: theme.spacing(0.5),
-        },
-        tip: {
-            fontSize: 12,
-            color: theme.palette.text.secondary,
-        },
-        button: {
-            marginTop: theme.spacing(1.5),
-        },
-        selectShrinkLabel: {
-            transform: 'translate(17px, -10px) scale(0.75) !important',
-        },
-        inputShrinkLabel: {
-            transform: 'translate(17px, -3px) scale(0.75) !important',
-        },
-    }),
-)
+const useStyles = makeStyles((theme) => ({
+    line: {
+        display: 'flex',
+        margin: theme.spacing(1),
+    },
+    input: {
+        flex: 1,
+        padding: theme.spacing(0.5),
+    },
+    tip: {
+        fontSize: 12,
+        color: theme.palette.text.secondary,
+    },
+    button: {
+        marginTop: theme.spacing(1.5),
+    },
+    selectShrinkLabel: {
+        transform: 'translate(17px, -10px) scale(0.75) !important',
+    },
+    inputShrinkLabel: {
+        transform: 'translate(17px, -3px) scale(0.75) !important',
+    },
+}))
 
 export interface RedPacketFormProps extends withClasses<never> {
     onCreate?(payload: RedPacketJSONPayload): void
@@ -81,14 +69,13 @@ export function RedPacketForm(props: RedPacketFormProps) {
     // context
     const account = useAccount()
     const chainId = useChainId()
-    const chainIdValid = useChainIdValid()
     const RED_PACKET_ADDRESS = useConstant(RED_PACKET_CONSTANTS, 'HAPPY_RED_PACKET_ADDRESS')
 
     //#region select token
-    const { value: etherTokenDetailed } = useEtherTokenDetailed()
-    const [token = etherTokenDetailed, setToken] = useState<EtherTokenDetailed | ERC20TokenDetailed | undefined>()
+    const { value: nativeTokenDetailed } = useNativeTokenDetailed()
+    const [token = nativeTokenDetailed, setToken] = useState<FungibleTokenDetailed | undefined>()
     const [id] = useState(uuid())
-    const [, setSelectTokenDialogOpen] = useRemoteControlledDialog(
+    const { setDialog: setSelectTokenDialog } = useRemoteControlledDialog(
         WalletMessages.events.selectTokenDialogUpdated,
         useCallback(
             (ev: SelectTokenDialogEvent) => {
@@ -99,10 +86,10 @@ export function RedPacketForm(props: RedPacketFormProps) {
         ),
     )
     const onSelectTokenChipClick = useCallback(() => {
-        setSelectTokenDialogOpen({
+        setSelectTokenDialog({
             open: true,
             uuid: id,
-            disableEther: false,
+            disableNativeToken: false,
             FixedTokenListProps: {
                 selectedTokens: token ? [token.address] : [],
             },
@@ -137,12 +124,12 @@ export function RedPacketForm(props: RedPacketFormProps) {
 
     // balance
     const { value: tokenBalance = '0', loading: loadingTokenBalance } = useTokenBalance(
-        token?.type ?? EthereumTokenType.Ether,
+        token?.type ?? EthereumTokenType.Native,
         token?.address ?? '',
     )
     //#endregion
 
-    //#region blocking
+    // send transaction and wait for hash
     const [createSettings, createState, createCallback, resetCreateCallback] = useCreateCallback({
         password: uuid(),
         duration: 60 /* seconds */ * 60 /* mins */ * 24 /* hours */,
@@ -156,7 +143,7 @@ export function RedPacketForm(props: RedPacketFormProps) {
     //#endregion
 
     //#region remote controlled transaction dialog
-    const [_, setTransactionDialogOpen] = useRemoteControlledDialog(
+    const { setDialog: setTransactionDialog } = useRemoteControlledDialog(
         EthereumMessages.events.transactionDialogUpdated,
         (ev) => {
             if (ev.open) return
@@ -218,21 +205,14 @@ export function RedPacketForm(props: RedPacketFormProps) {
     // open the transaction dialog
     useEffect(() => {
         if (!token || createState.type === TransactionStateType.UNKNOWN) return
-        setTransactionDialogOpen({
+        setTransactionDialog({
             open: true,
             state: createState,
-            summary: `Creating red packet with ${formatBalance(totalAmount, token.decimals)} ${token.symbol}`,
+            summary: t('plugin_red_packet_create_with_token', {
+                symbol: `${formatBalance(totalAmount, token.decimals)} ${token.symbol}`,
+            }),
         })
     }, [createState /* update tx dialog only if state changed */])
-    //#endregion
-
-    //#region connect wallet
-    const [, setSelectProviderDialogOpen] = useRemoteControlledDialog(WalletMessages.events.selectProviderDialogUpdated)
-    const onConnect = useCallback(() => {
-        setSelectProviderDialogOpen({
-            open: true,
-        })
-    }, [setSelectProviderDialogOpen])
     //#endregion
 
     const validationMessage = useMemo(() => {
@@ -240,8 +220,9 @@ export function RedPacketForm(props: RedPacketFormProps) {
         if (!account) return t('plugin_wallet_connect_a_wallet')
         if (new BigNumber(shares || '0').isZero()) return 'Enter shares'
         if (new BigNumber(shares || '0').isGreaterThan(255)) return 'At most 255 recipients'
-        if (new BigNumber(amount).isZero()) return 'Enter an amount'
-        if (new BigNumber(totalAmount).isGreaterThan(tokenBalance)) return `Insufficient ${token.symbol} balance`
+        if (new BigNumber(amount).isZero()) return t('plugin_dhedge_enter_an_amount')
+        if (new BigNumber(totalAmount).isGreaterThan(tokenBalance))
+            return t('plugin_gitcoin_insufficient_balance', { symbol: token.symbol })
         return ''
     }, [account, amount, totalAmount, shares, token, tokenBalance])
 
@@ -252,6 +233,7 @@ export function RedPacketForm(props: RedPacketFormProps) {
                 <FormControl className={classes.input} variant="outlined">
                     <InputLabel className={classes.selectShrinkLabel}>{t('plugin_red_packet_split_mode')}</InputLabel>
                     <Select
+                        variant="standard"
                         value={isRandom ? 1 : 0}
                         onChange={(e) => {
                             // foolproof, reset amount since the meaning of amount changed:
@@ -290,7 +272,7 @@ export function RedPacketForm(props: RedPacketFormProps) {
             <div className={classes.line}>
                 <TokenAmountPanel
                     classes={{ root: classes.input }}
-                    label={isRandom ? 'Total Amount' : 'Amount per Share'}
+                    label={isRandom ? 'Total Amount' : t('plugin_red_packet_amount_per_share')}
                     amount={rawAmount}
                     balance={tokenBalance}
                     token={token}
@@ -330,7 +312,10 @@ export function RedPacketForm(props: RedPacketFormProps) {
                         fullWidth
                         disabled={!!validationMessage}
                         onClick={createCallback}>
-                        {validationMessage || `Send ${formatBalance(totalAmount, token.decimals)} ${token.symbol}`}
+                        {validationMessage ||
+                            t('plugin_red_packet_send_symbol', {
+                                symbol: `${formatBalance(totalAmount, token.decimals)} ${token.symbol}`,
+                            })}
                     </ActionButton>
                 </EthereumERC20TokenApprovedBoundary>
             </EthereumWalletConnectedBoundary>

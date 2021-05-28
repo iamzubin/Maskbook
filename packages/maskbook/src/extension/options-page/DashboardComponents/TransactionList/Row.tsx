@@ -1,10 +1,10 @@
 import type { FC } from 'react'
 import classNames from 'classnames'
 import { isNil } from 'lodash-es'
-import { createStyles, Link, makeStyles, TableCell, TableRow, Typography } from '@material-ui/core'
+import { Link, makeStyles, TableCell, TableRow, Typography } from '@material-ui/core'
 import { Record } from './Record'
 import type { Transaction } from '../../../../plugins/Wallet/types'
-import { resolveLinkOnEtherscan } from '../../../../web3/pipes'
+import { resolveLinkOnExplorer } from '../../../../web3/pipes'
 import type { ChainId } from '../../../../web3/types'
 
 interface Props {
@@ -12,21 +12,19 @@ interface Props {
     transaction: Transaction
 }
 
-const useStyles = makeStyles(() =>
-    createStyles({
-        failed: { opacity: 0.3 },
-        hidden: { visibility: 'hidden' },
-        overflow: {
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-        },
-        row: {
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-        },
-    }),
-)
+const useStyles = makeStyles(() => ({
+    failed: { opacity: 0.3 },
+    hidden: { visibility: 'hidden' },
+    overflow: {
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+    },
+    row: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+    },
+}))
 
 export const Row: FC<Props> = ({ transaction, chainId }) => {
     const styles = useStyles()
@@ -76,7 +74,7 @@ interface AddressProps {
 }
 
 const Address: FC<AddressProps> = ({ id, mode, chainId }) => {
-    const href = `${resolveLinkOnEtherscan(chainId)}/${mode}/${id}`
+    const href = `${resolveLinkOnExplorer(chainId)}/${mode}/${id}`
     return id ? (
         <Link target={id} href={href}>
             <span>{id?.slice(0, 5)}</span>

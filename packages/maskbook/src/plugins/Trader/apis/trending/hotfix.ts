@@ -1,5 +1,5 @@
 import { DataProvider, TagType } from '../../types'
-import { unreachable } from '../../../../utils/utils'
+import { unreachable } from '@dimensiondev/maskbook-shared'
 import MIRRORED_TOKENS from './mirrored_tokens.json'
 import STOCKS_KEYWORDS from './stocks.json'
 import CASHTAG_KEYWORDS from './cashtag.json'
@@ -93,8 +93,10 @@ export function isBlockedId(id: string, dataProvider: DataProvider) {
 }
 
 export function isBlockedKeyword(type: TagType, keyword: string) {
-    if (type === TagType.HASH) return [...STOCKS_KEYWORDS, ...HASHTAG_KEYWORDS].includes(keyword.toUpperCase())
-    if (type === TagType.CASH) return [...STOCKS_KEYWORDS, ...CASHTAG_KEYWORDS].includes(keyword.toUpperCase())
+    const search = keyword.toUpperCase()
+    if (STOCKS_KEYWORDS.includes(search)) return true
+    if (type === TagType.HASH) return HASHTAG_KEYWORDS.includes(search)
+    if (type === TagType.CASH) return CASHTAG_KEYWORDS.includes(search)
     return true
 }
 

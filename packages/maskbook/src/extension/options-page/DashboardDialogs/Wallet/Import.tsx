@@ -1,55 +1,46 @@
-import {
-    Box,
-    Checkbox,
-    createStyles,
-    FormControlLabel,
-    makeStyles,
-    TextField,
-    Theme,
-    Typography,
-} from '@material-ui/core'
+import { Box, Checkbox, FormControlLabel, makeStyles, TextField, Theme, Typography } from '@material-ui/core'
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined'
 import { useCallback, useState } from 'react'
 import { CreditCard as CreditCardIcon } from 'react-feather'
+import {
+    WALLET_OR_PERSONA_NAME_MAX_LEN,
+    useRemoteControlledDialog,
+    useI18N,
+    checkInputLengthExceed,
+} from '../../../../utils'
 import { HD_PATH_WITHOUT_INDEX_ETHEREUM } from '../../../../plugins/Wallet/constants'
-import { useWalletHD } from '../../../../plugins/Wallet/hooks/useWallet'
+import { first } from 'lodash-es'
+import { useWallet } from '@dimensiondev/web3-shared'
 import { WalletMessages, WalletRPC } from '../../../../plugins/Wallet/messages'
-import { WALLET_OR_PERSONA_NAME_MAX_LEN } from '../../../../utils/constants'
-import { useRemoteControlledDialog } from '../../../../utils/hooks/useRemoteControlledDialog'
-import { useI18N } from '../../../../utils/i18n-next-ui'
-import { checkInputLengthExceed } from '../../../../utils/utils'
 import AbstractTab, { AbstractTabProps } from '../../DashboardComponents/AbstractTab'
 import { DebounceButton } from '../../DashboardComponents/ActionButton'
 import { DashboardDialogCore, DashboardDialogWrapper, useSnackbarCallback, WrappedDialogProps } from '../Base'
+import { useAsync } from 'react-use'
 
-const useWalletImportDialogStyle = makeStyles((theme: Theme) =>
-    createStyles({
-        confirmation: {
-            fontSize: 16,
-            lineHeight: 1.75,
-            [theme.breakpoints.down('sm')]: {
-                fontSize: 14,
-            },
+const useWalletImportDialogStyle = makeStyles((theme: Theme) => ({
+    confirmation: {
+        fontSize: 16,
+        lineHeight: 1.75,
+        [theme.breakpoints.down('sm')]: {
+            fontSize: 14,
         },
-        notification: {
-            fontSize: 12,
-            fontWeight: 500,
-            textAlign: 'center',
-            backgroundColor: '#FFD5B3',
-            color: 'black',
-            padding: '8px 22px',
-            margin: '24px -36px 0',
-            [theme.breakpoints.down('sm')]: {
-                margin: '24px -16px 0',
-            },
-        },
-        notificationIcon: {
-            width: 16,
-            height: 16,
-            color: '#FF9138',
-        },
-    }),
-)
+    },
+    notification: {
+        fontSize: 12,
+        fontWeight: 500,
+        textAlign: 'center',
+        backgroundColor: theme.palette.mode === 'dark' ? '#17191D' : '#EFF5FF',
+
+        padding: '8px 22px',
+        margin: theme.spacing(1, 0, 0),
+        borderRadius: '4px',
+    },
+    notificationIcon: {
+        width: 16,
+        height: 16,
+        color: theme.palette.primary.main,
+    },
+}))
 
 export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
     const { t } = useI18N()
@@ -94,11 +85,11 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
                             sx={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
                             }}>
                             <FormControlLabel
                                 control={
                                     <Checkbox
+                                        color="primary"
                                         checked={confirmed}
                                         onChange={() => setConfirmed((confirmed) => !confirmed)}
                                     />
@@ -195,20 +186,22 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
             },
         ],
         state,
-        height: 112,
+        height: 'auto',
     }
 
-    const [, setCreateWalletDialogOpen] = useRemoteControlledDialog(WalletMessages.events.createWalletDialogUpdated)
+    const { setDialog: setCreateWalletDialog } = useRemoteControlledDialog(
+        WalletMessages.events.createWalletDialogUpdated,
+    )
 
     const onCreate = useCallback(
         (name: string) => {
             if (hdWallet) return
-            setCreateWalletDialogOpen({
+            setCreateWalletDialog({
                 open: true,
                 name,
             })
         },
-        [hdWallet?.address, setCreateWalletDialogOpen],
+        [hdWallet?.address, setCreateWalletDialog],
     )
     const onDeriveOrImport = useSnackbarCallback(
         async () => {
@@ -279,4 +272,14 @@ export function DashboardWalletImportDialog(props: WrappedDialogProps<object>) {
             />
         </DashboardDialogCore>
     )
+}
+/** Return the wallet with mnemonic words */
+function useWalletHD() {
+    const selectedWallet = useWallet()?.address
+    return useAsync(async () => {
+        const selected = await WalletRPC.getWallet(selectedWallet)
+        if (selected?.mnemonic.length) return selected
+        const all = await WalletRPC.getWallets()
+        return first(all.filter((x) => x.mnemonic.length).sort((a, z) => a.createdAt.getTime() - z.createdAt.getTime()))
+    }, [selectedWallet]).value
 }

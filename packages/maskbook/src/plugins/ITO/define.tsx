@@ -1,9 +1,7 @@
-import { Suspense } from 'react'
-import { makeStyles, createStyles } from '@material-ui/core'
-import { ITO_Loading } from './UI/ITO'
+import { makeStyles } from '@material-ui/core'
 import { PostInspector } from './UI/PostInspector'
 import { PluginConfig, PluginScope, PluginStage } from '../types'
-import { formatBalance } from '../Wallet/formatter'
+import { formatBalance } from '@dimensiondev/maskbook-shared'
 import { ITO_MetaKey, ITO_PluginID } from './constants'
 import type { JSON_PayloadOutMask } from './types'
 import { ITO_MetadataReader, payloadIntoMask } from './helpers'
@@ -11,24 +9,23 @@ import MaskbookPluginWrapper from '../MaskbookPluginWrapper'
 import { createCompositionDialog } from '../utils/createCompositionDialog'
 import { CompositionDialog } from './UI/CompositionDialog'
 import { ItoLabelIcon } from './assets/ItoLabelIcon'
-import { formatEthereumAddress } from '../../plugins/Wallet/formatter'
+import { formatEthereumAddress } from '@dimensiondev/maskbook-shared'
+import { ChainState } from '../../web3/state/useChainState'
 
 interface LabelWrapperProps {
     iconSize: number
     labelText: string
 }
 
-const useStyles = makeStyles((theme) =>
-    createStyles({
-        root: {
-            display: 'flex',
-            alignItems: 'center',
-        },
-        span: {
-            paddingLeft: theme.spacing(1),
-        },
-    }),
-)
+const useStyles = makeStyles((theme) => ({
+    root: {
+        display: 'flex',
+        alignItems: 'center',
+    },
+    span: {
+        paddingLeft: theme.spacing(1),
+    },
+}))
 
 function LabelWrapper(props: LabelWrapperProps) {
     const classes = useStyles()
@@ -42,7 +39,11 @@ function LabelWrapper(props: LabelWrapperProps) {
 
 export const [ITO_CompositionEntry, ITO_CompositionUI] = createCompositionDialog(
     <LabelWrapper iconSize={12} labelText={'ITO'} />,
-    (props) => <CompositionDialog open={props.open} onConfirm={props.onClose} onClose={props.onClose} />,
+    (props) => (
+        <ChainState.Provider>
+            <CompositionDialog open={props.open} onConfirm={props.onClose} onClose={props.onClose} />
+        </ChainState.Provider>
+    ),
 )
 
 export const ITO_PluginDefine: PluginConfig = {
@@ -58,9 +59,9 @@ export const ITO_PluginDefine: PluginConfig = {
         if (!payload.ok) return null
         return (
             <MaskbookPluginWrapper pluginName="ITO">
-                <Suspense fallback={<ITO_Loading />}>
+                <ChainState.Provider>
                     <PostInspector payload={payloadIntoMask(payload.val)} />
-                </Suspense>
+                </ChainState.Provider>
             </MaskbookPluginWrapper>
         )
     },

@@ -9,16 +9,19 @@ import { useCurrentIdentity, useFriendsList } from '../DataSource/useActivatedUI
 import { useValueRef } from '../../utils/hooks/useValueRef'
 import { debugModeSetting } from '../../settings/settings'
 import { DebugList } from '../DebugModeUI/DebugList'
-import type { TypedMessage } from '../../protocols/typed-message'
+import type { TypedMessageTuple } from '@dimensiondev/maskbook-shared'
 import type { PluginConfig } from '../../plugins/types'
 import { PluginUI } from '../../plugins/PluginUI'
 import { usePostInfoDetails, usePostInfo } from '../DataSource/usePostInfo'
 import { ErrorBoundary } from '../shared/ErrorBoundary'
 import type { PayloadAlpha40_Or_Alpha39, PayloadAlpha38 } from '../../utils/type-transform/Payload'
 import { decodePublicKeyUI } from '../../social-network/utils/text-payload-ui'
+import { createInjectHooksRenderer, useActivatedPluginsSNSAdaptor } from '@dimensiondev/mask-plugin-infra'
+
+const PluginHooksRenderer = createInjectHooksRenderer(useActivatedPluginsSNSAdaptor, (plugin) => plugin.PostInspector)
 
 export interface PostInspectorProps {
-    onDecrypted(post: TypedMessage, raw: string): void
+    onDecrypted(post: TypedMessageTuple): void
     needZip(): void
     DecryptPostProps?: Partial<DecryptPostProps>
     DecryptPostComponent?: React.ComponentType<DecryptPostProps>
@@ -115,14 +118,15 @@ export function PostInspector(props: PostInspectorProps) {
             <>
                 {props.slotPosition !== 'after' && slot}
                 {x}
-                <PluginPostInspector />
+                <PluginHooksRenderer />
+                <OldPluginPostInspector />
                 {debugInfo}
                 {props.slotPosition !== 'before' && slot}
             </>
         )
     }
 }
-function PluginPostInspector() {
+function OldPluginPostInspector() {
     return (
         <>
             {[...PluginUI.values()].map((x) => (

@@ -3,7 +3,6 @@ import { MoreHorizontal } from 'react-feather'
 import {
     makeStyles,
     Theme,
-    createStyles,
     DialogContent,
     ImageList,
     ImageListItem,
@@ -13,47 +12,43 @@ import {
 } from '@material-ui/core'
 import { isEnvironment, Environment } from '@dimensiondev/holoflows-kit'
 import { useHistory } from 'react-router-dom'
-import { useI18N } from '../../../utils/i18n-next-ui'
+import { useRemoteControlledDialog, useI18N, Flags } from '../../../utils'
+import { unreachable } from '@dimensiondev/maskbook-shared'
 import { useStylesExtends } from '../../../components/custom-ui-helper'
 import { Provider } from './Provider'
 import { MetaMaskIcon } from '../../../resources/MetaMaskIcon'
 import { MaskbookIcon } from '../../../resources/MaskbookIcon'
 import { WalletConnectIcon } from '../../../resources/WalletConnectIcon'
 import Services from '../../../extension/service'
-import { useRemoteControlledDialog } from '../../../utils/hooks/useRemoteControlledDialog'
 import { WalletMessages } from '../messages'
 import { DashboardRoute } from '../../../extension/options-page/Route'
 import { ProviderType } from '../../../web3/types'
-import { unreachable } from '../../../utils/utils'
-import { Flags } from '../../../utils/flags'
 import { InjectedDialog } from '../../../components/shared/InjectedDialog'
-import { useWallets } from '../hooks/useWallet'
+import { useWalletsOfProvider } from '@dimensiondev/web3-shared'
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        paper: {
-            width: '750px !important',
-            maxWidth: 'unset',
-        },
-        content: {
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'space-around',
-            overflow: 'hidden',
-            padding: theme.spacing(4, 4.5, 2),
-        },
-        grid: {
-            width: '100%',
-            margin: 0,
-        },
-        icon: {
-            fontSize: 45,
-        },
-        tip: {
-            fontSize: 12,
-        },
-    }),
-)
+const useStyles = makeStyles((theme: Theme) => ({
+    paper: {
+        width: '750px !important',
+        maxWidth: 'unset',
+    },
+    content: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'space-around',
+        overflow: 'hidden',
+        padding: theme.spacing(4, 4.5, 2),
+    },
+    grid: {
+        width: '100%',
+        margin: 0,
+    },
+    icon: {
+        fontSize: 45,
+    },
+    tip: {
+        fontSize: 12,
+    },
+}))
 
 interface SelectProviderDialogUIProps extends withClasses<never> {}
 
@@ -63,34 +58,29 @@ function SelectProviderDialogUI(props: SelectProviderDialogUIProps) {
     const history = useHistory()
 
     //#region remote controlled dialog logic
-    const [open, setOpen] = useRemoteControlledDialog(WalletMessages.events.selectProviderDialogUpdated)
-    const onClose = useCallback(() => {
-        setOpen({
-            open: false,
-        })
-    }, [setOpen])
+    const { open, closeDialog } = useRemoteControlledDialog(WalletMessages.events.selectProviderDialogUpdated)
     //#endregion
 
     //#region select wallet dialog
-    const [, selectWalletDialogOpen] = useRemoteControlledDialog(WalletMessages.events.selectWalletDialogUpdated)
+    const { openDialog: openSelectWalletDialog } = useRemoteControlledDialog(
+        WalletMessages.events.selectWalletDialogUpdated,
+    )
     //#endregion
 
     //#region wallet connect QR code dialog
-    const [_, setWalletConnectDialogOpen] = useRemoteControlledDialog(
+    const { setDialog: setWalletConnectDialog } = useRemoteControlledDialog(
         WalletMessages.events.walletConnectQRCodeDialogUpdated,
     )
     //#endregion
 
-    const wallets = useWallets(ProviderType.Maskbook)
+    const wallets = useWalletsOfProvider(ProviderType.Maskbook)
     const onConnect = useCallback(
         async (providerType: ProviderType) => {
-            onClose()
+            closeDialog()
             switch (providerType) {
                 case ProviderType.Maskbook:
                     if (wallets.length > 0) {
-                        selectWalletDialogOpen({
-                            open: true,
-                        })
+                        openSelectWalletDialog()
                         return
                     }
                     if (isEnvironment(Environment.ManifestOptions))
@@ -101,20 +91,22 @@ function SelectProviderDialogUI(props: SelectProviderDialogUIProps) {
                     await Services.Ethereum.connectMetaMask()
                     break
                 case ProviderType.WalletConnect:
-                    setWalletConnectDialogOpen({
+                    setWalletConnectDialog({
                         open: true,
                         uri: await Services.Ethereum.createConnectionURI(),
                     })
+                    break
+                case ProviderType.CustomNetwork:
                     break
                 default:
                     unreachable(providerType)
             }
         },
-        [wallets, history, onClose, selectWalletDialogOpen, setWalletConnectDialogOpen],
+        [wallets, history, closeDialog, openSelectWalletDialog, setWalletConnectDialog],
     )
 
     return (
-        <InjectedDialog title={t('plugin_wallet_select_provider_dialog_title')} open={open} onClose={onClose}>
+        <InjectedDialog title={t('plugin_wallet_select_provider_dialog_title')} open={open} onClose={closeDialog}>
             <DialogContent className={classes.content}>
                 <ImageList className={classes.grid} gap={16} rowHeight={183}>
                     <ImageListItem>

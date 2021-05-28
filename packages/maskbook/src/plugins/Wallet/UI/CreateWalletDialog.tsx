@@ -1,27 +1,20 @@
 import { useState, useCallback } from 'react'
-import {
-    Button,
-    Box,
-    Card,
-    createStyles,
-    DialogContent,
-    makeStyles,
-    useTheme,
-    TextField,
-    Typography,
-} from '@material-ui/core'
+import { Button, Box, Card, DialogContent, makeStyles, useTheme, TextField, Typography } from '@material-ui/core'
 import RefreshIcon from '@material-ui/icons/Refresh'
 import classNames from 'classnames'
-import { useI18N } from '../../../utils/i18n-next-ui'
+import {
+    WALLET_OR_PERSONA_NAME_MAX_LEN,
+    checkInputLengthExceed,
+    delay,
+    useRemoteControlledDialog,
+    useI18N,
+} from '../../../utils'
 import { useStylesExtends } from '../../../components/custom-ui-helper'
-import { useRemoteControlledDialog } from '../../../utils/hooks/useRemoteControlledDialog'
 import { WalletMessages, WalletRPC } from '../messages'
-import { checkInputLengthExceed, delay } from '../../../utils/utils'
 import { InjectedDialog } from '../../../components/shared/InjectedDialog'
 import { useSnackbarCallback } from '../../../extension/options-page/DashboardDialogs/Base'
 import ActionButton from '../../../extension/options-page/DashboardComponents/ActionButton'
 import { useMnemonicWordsPuzzle } from '../hooks/useMnemonicWordsPuzzle'
-import { WALLET_OR_PERSONA_NAME_MAX_LEN } from '../../../utils/constants'
 import { HD_PATH_WITHOUT_INDEX_ETHEREUM } from '../constants'
 
 enum CreateWalletStep {
@@ -30,56 +23,54 @@ enum CreateWalletStep {
     Verify,
 }
 
-const useStyles = makeStyles((theme) =>
-    createStyles({
-        content: {
-            padding: theme.spacing(5, 4.5),
-        },
-        top: {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            padding: theme.spacing(0, 0, 2),
-        },
-        bottom: {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: theme.spacing(4, 0, 0),
-        },
-        description: {},
-        input: {
-            width: '100%',
-        },
-        card: {
-            position: 'relative',
-            minHeight: 140,
-            display: 'flex',
-            flexFlow: 'row wrap',
-            alignContent: 'flex-start',
-            justifyContent: 'space-evenly',
-        },
-        cardButton: {
-            padding: theme.spacing(1, 2, 3),
-            backgroundColor: theme.palette.mode === 'dark' ? 'transparent' : theme.palette.grey[50],
-        },
-        cardTextfield: {
-            justifyContent: 'space-between',
-        },
-        word: {
-            width: 101,
-            minWidth: 101,
-            whiteSpace: 'nowrap',
-            marginTop: theme.spacing(2),
-        },
-        wordButton: {
-            backgroundColor: theme.palette.mode === 'dark' ? 'transparent' : theme.palette.common.white,
-        },
-        wordTextfield: {
-            width: 110,
-        },
-    }),
-)
+const useStyles = makeStyles((theme) => ({
+    content: {
+        padding: theme.spacing(5, 4.5),
+    },
+    top: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        padding: theme.spacing(0, 0, 2),
+    },
+    bottom: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: theme.spacing(4, 0, 0),
+    },
+    description: {},
+    input: {
+        width: '100%',
+    },
+    card: {
+        position: 'relative',
+        minHeight: 140,
+        display: 'flex',
+        flexFlow: 'row wrap',
+        alignContent: 'flex-start',
+        justifyContent: 'space-evenly',
+    },
+    cardButton: {
+        padding: theme.spacing(1, 2, 3),
+        backgroundColor: theme.palette.mode === 'dark' ? 'transparent' : theme.palette.grey[50],
+    },
+    cardTextfield: {
+        justifyContent: 'space-between',
+    },
+    word: {
+        width: 101,
+        minWidth: 101,
+        whiteSpace: 'nowrap',
+        marginTop: theme.spacing(2),
+    },
+    wordButton: {
+        backgroundColor: theme.palette.mode === 'dark' ? 'transparent' : theme.palette.common.white,
+    },
+    wordTextfield: {
+        width: 110,
+    },
+}))
 
 export interface CreateWalletDialogProps extends withClasses<never> {}
 
@@ -96,16 +87,14 @@ export function CreateWalletDialog(props: CreateWalletDialogProps) {
     //#endregion
 
     //#region remote controlled dialog logic
-    const [open, setOpen] = useRemoteControlledDialog(WalletMessages.events.createWalletDialogUpdated, (ev) => {
+    const { open, closeDialog } = useRemoteControlledDialog(WalletMessages.events.createWalletDialogUpdated, (ev) => {
         if (!ev.open) return
         if (!ev.name) return
         setName(ev.name)
         setStep(CreateWalletStep.Words)
     })
     const onClose = useCallback(async () => {
-        setOpen({
-            open: false,
-        })
+        closeDialog()
         await delay(300)
         setName('')
         setStep(CreateWalletStep.Name)

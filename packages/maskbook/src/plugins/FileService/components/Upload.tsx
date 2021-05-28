@@ -5,8 +5,8 @@ import { isNil } from 'lodash-es'
 import { Trans } from 'react-i18next'
 import { useHistory } from 'react-router'
 import { useAsync } from 'react-use'
+import { useI18N } from '../../../utils'
 import { PluginFileServiceRPC } from '../utils'
-import { useI18N } from '../../../utils/i18n-next-ui'
 import { makeFileKey } from '../arweave/makeFileKey'
 import { FileRouter, MAX_FILE_SIZE } from '../constants'
 import { RecentFiles } from './RecentFiles'
@@ -89,12 +89,24 @@ export const Upload: React.FC = () => {
             </section>
             <section className={classes.checkItems}>
                 <FormControlLabel
-                    control={<Checkbox checked={encrypted} onChange={(event, checked) => setEncrypted(checked)} />}
+                    control={
+                        <Checkbox
+                            color="secondary"
+                            checked={encrypted}
+                            onChange={(event) => setEncrypted(event.target.checked)}
+                        />
+                    }
                     className={classes.encrypted}
                     label={t('plugin_file_service_on_encrypt_it')}
                 />
                 <FormControlLabel
-                    control={<Checkbox checked={useCDN} onChange={(event, checked) => setUseCDN(checked)} />}
+                    control={
+                        <Checkbox
+                            color="secondary"
+                            checked={useCDN}
+                            onChange={(event) => setUseCDN(event.target.checked)}
+                        />
+                    }
                     className={classes.usedCDN}
                     label={t('plugin_file_service_use_cdn')}
                 />

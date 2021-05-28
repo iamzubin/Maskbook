@@ -1,36 +1,34 @@
-import { Box, createStyles, makeStyles, Theme, Typography } from '@material-ui/core'
+import { formatBalance } from '@dimensiondev/maskbook-shared'
+import { Box, makeStyles, Theme, Typography } from '@material-ui/core'
 import { TokenIcon } from '../../../../extension/options-page/DashboardComponents/TokenIcon'
-import { formatBalance } from '../../../Wallet/formatter'
-import type { ERC20TokenDetailed, EtherTokenDetailed } from '../../../../web3/types'
+import type { FungibleTokenDetailed } from '../../../../web3/types'
 
 export interface TokenPanelProps {
     amount: string
-    token: EtherTokenDetailed | ERC20TokenDetailed
+    token: FungibleTokenDetailed
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            padding: theme.spacing(1, 0),
-        },
-        icon: {
-            width: 28,
-            height: 28,
-        },
-        primary: {
-            flex: '1',
-            display: 'flex',
-            alignItems: 'center',
-        },
-        amount: {
-            fontSize: 18,
-            marginLeft: theme.spacing(1),
-        },
-        symbol: {
-            fontSize: 18,
-        },
-    }),
-)
+const useStyles = makeStyles((theme: Theme) => ({
+    root: {
+        padding: theme.spacing(1, 0),
+    },
+    icon: {
+        width: 28,
+        height: 28,
+    },
+    primary: {
+        flex: '1',
+        display: 'flex',
+        alignItems: 'center',
+    },
+    amount: {
+        fontSize: 18,
+        marginLeft: theme.spacing(1),
+    },
+    symbol: {
+        fontSize: 18,
+    },
+}))
 
 export function TokenPanel(props: TokenPanelProps) {
     const { amount, token } = props

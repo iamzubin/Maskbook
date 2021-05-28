@@ -85,8 +85,8 @@ const MSKE = createERC20Token(
 
 export const ITO_CONSTANTS = {
     ITO_CONTRACT_ADDRESS: {
-        [ChainId.Mainnet]: '0x198457da5e7f7b7fd916006837417dcf663f692d',
-        [ChainId.Ropsten]: '0x9003aed6d33604617da90e084b081ec65f18e786',
+        [ChainId.Mainnet]: '0xf110fec3075d7531141b6bf16b11604cb028a17b',
+        [ChainId.Ropsten]: '0x37c2f41085ff45f54652c359a7de4deb9d125bf2',
         [ChainId.Rinkeby]: '0x7751b8c715d1Df74D181C86aE01801330211f370',
         [ChainId.Kovan]: '',
         [ChainId.Gorli]: '',
@@ -99,8 +99,8 @@ export const ITO_CONSTANTS = {
         [ChainId.Gorli]: '',
     },
     DEFAULT_QUALIFICATION_ADDRESS: {
-        [ChainId.Mainnet]: '0x989252d4853db438235fbd9c946afc4cca6e21f1',
-        [ChainId.Ropsten]: '0xbe3dd217479d93ed76457f01c98296c5235f3054',
+        [ChainId.Mainnet]: '0x81b6ae377e360dcad63611846a2516f4ba8c88ac',
+        [ChainId.Ropsten]: '0x050745919acaa000e5b116b2c499e6f4ed5ce5b6',
         [ChainId.Rinkeby]: '0x88AA0AB3B7cDE263073e1cBa1D06473adeC1b38E',
         [ChainId.Kovan]: '',
         [ChainId.Gorli]: '',
@@ -124,8 +124,11 @@ export const ITO_CONSTANTS = {
 export const ITO_CONTRACT_BASE_TIMESTAMP = new Date('2021-03-29T00:00:00.000Z').getTime()
 
 export const TIME_WAIT_BLOCKCHAIN = 30000
-
+// Keccak-256(ifQualified(address)) XOR Keccak-256(logQualified(address,uint256))
 export const QUALIFICATION_INTERFACE_ID = '0xfb036a85'
+// Keccak-256(get_start_time())
 export const QUALIFICATION_HAS_START_TIME_INTERFACE_ID = '0xdf29dfc4'
+// Keccak-256(isLucky(address))
+export const QUALIFICATION_HAS_LUCKY_INTERFACE_ID = '0xadaa0f8a'
 
 export const MSG_DELIMITER = '2c1aca02'

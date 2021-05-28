@@ -1,9 +1,8 @@
-import stringify from 'json-stable-stringify'
 import { createGlobalSettings, createNetworkSettings } from './createSettings'
 import i18nNextInstance, { i18n } from '../utils/i18n-next'
 import { sideEffect } from '../utils/side-effects'
-import { ChainId } from '../web3/types'
-import { Appearance, Language, LaunchPage } from './types'
+import { LaunchPage } from './types'
+import { Appearance, Language } from '@dimensiondev/maskbook-theme'
 
 /**
  * Does the debug mode on
@@ -39,31 +38,6 @@ export const appearanceSettings = createGlobalSettings<Appearance>('appearance',
 })
 //#endregion
 
-//#region chain state settings
-export const currentBlockNumnberStateSettings = createGlobalSettings<string>('block number state', stringify([]), {
-    primary: () => 'DO NOT DISPLAY IT IN UI',
-})
-//#endregion
-
-//#region provider chain id
-export const currentMaskbookChainIdSettings = createGlobalSettings<ChainId>('maskbook chain id', ChainId.Mainnet, {
-    primary: () => i18n.t('settings_choose_eth_network'),
-    secondary: () => 'This only affects the built-in wallet.',
-})
-
-export const currentMetaMaskChainIdSettings = createGlobalSettings<ChainId>('metamask chain id', ChainId.Mainnet, {
-    primary: () => 'DO NOT DISPLAY IT IN UI',
-})
-
-export const currentWalletConnectChainIdSettings = createGlobalSettings<ChainId>(
-    'walletconnect chain id',
-    ChainId.Mainnet,
-    {
-        primary: () => 'DO NOT DISPLAY IT IN UI',
-    },
-)
-//#endregion
-
 //#region language
 const lang: string = i18nNextInstance.language
 export const languageSettings = createGlobalSettings<Language>(
@@ -94,6 +68,10 @@ export const launchPageSettings = createGlobalSettings<LaunchPage>('launchPage',
 export const newDashboardConnection = createGlobalSettings('beta-dashboard', false, {
     primary: () => 'Experimental: Allow isolated dashboard to connect',
     secondary: () => "WARNING: DON'T OPEN THIS UNLESS YOU KNOW WHAT YOU ARE DOING.",
+})
+
+export const currentPersonaIdentifier = createGlobalSettings<string>('currentPersonaIdentifier', '', {
+    primary: () => 'DO NOT DISPLAY IT IN UI',
 })
 
 sideEffect.then(() => {

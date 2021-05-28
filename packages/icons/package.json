@@ -4,8 +4,11 @@
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
   "sideEffects": false,
+  "dependencies": {
+    "@dimensiondev/maskbook-theme": "workspace:*"
+  },
   "devDependencies": {
-    "snowpack": "^3.2.2"
+    "snowpack": "^3.5.1"
   },
   "scripts": {
     "start": "snowpack dev",

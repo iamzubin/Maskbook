@@ -1,25 +1,15 @@
 import { useMemo } from 'react'
-import {
-    Button,
-    createStyles,
-    makeStyles,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableRow,
-    Typography,
-} from '@material-ui/core'
+import { Button, makeStyles, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@material-ui/core'
+import { useI18N } from '../../../../utils'
 import { CollectibleTab } from '../CollectibleTab'
 import { CollectibleState } from '../../hooks/useCollectibleState'
 import { Row } from './Row'
-import { useI18N } from '../../../../utils/i18n-next-ui'
 import { CollectibleProvider } from '../../types'
 import { TableListPagination } from '../Pagination'
 import { LoadingTable } from '../LoadingTable'
 
 const useStyles = makeStyles((theme) => {
-    return createStyles({
+    return {
         root: {
             overflow: 'auto',
         },
@@ -40,7 +30,7 @@ const useStyles = makeStyles((theme) => {
         emptyCell: {
             borderStyle: 'none',
         },
-    })
+    }
 })
 
 export interface HistoryTabProps {}

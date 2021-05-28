@@ -4,7 +4,6 @@ import {
     Button,
     Chip,
     IconButton,
-    createStyles,
     makeStyles,
     Skeleton,
     Table,
@@ -21,67 +20,66 @@ import classNames from 'classnames'
 import ExpandLessIcon from '@material-ui/icons/ExpandLess'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { useStylesExtends } from '../../../components/custom-ui-helper'
-import { formatBalance, formatCurrency } from '../../../plugins/Wallet/formatter'
-import { useI18N } from '../../../utils/i18n-next-ui'
+import { formatBalance, formatCurrency, FormattedCurrency } from '@dimensiondev/maskbook-shared'
+import { useMatchXS, useI18N } from '../../../utils'
 import { CurrencyType, ERC20TokenDetailed, EthereumTokenType } from '../../../web3/types'
 import { isSameAddress } from '../../../web3/helpers'
 import { TokenIcon } from './TokenIcon'
-import type { WalletRecord } from '../../../plugins/Wallet/database/types'
+import type { Wallet } from '@dimensiondev/web3-shared'
 import { ActionsBarFT } from './ActionsBarFT'
 import { useTrustedERC20TokensFromDB } from '../../../plugins/Wallet/hooks/useERC20Tokens'
 import { useStableTokensDebank } from '../../../web3/hooks/useStableTokensDebank'
 import type { Asset } from '../../../plugins/Wallet/types'
 import { getTokenUSDValue } from '../../../plugins/Wallet/helpers'
 import { useAssets } from '../../../plugins/Wallet/hooks/useAssets'
-import { useMatchXS } from '../../../utils/hooks/useMatchXS'
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles<string, { isMobile: boolean }>({
-        container: {
-            '&::-webkit-scrollbar': {
-                display: 'none',
-            },
-            padding: theme.spacing(0),
+const useStyles = makeStyles<
+    Theme,
+    { isMobile: boolean },
+    'container' | 'head' | 'cell' | 'record' | 'coin' | 'name' | 'chain' | 'price' | 'more' | 'lessButton'
+>((theme) => ({
+    container: {
+        '&::-webkit-scrollbar': {
+            display: 'none',
         },
-        table: {},
-        head: {
-            backgroundColor: theme.palette.mode === 'light' ? theme.palette.common.white : 'var(--drawerBody)',
-        },
-        cell: {
-            paddingLeft: ({ isMobile }) => (isMobile ? theme.spacing(0.5) : theme.spacing(2)),
-            paddingRight: ({ isMobile }) => (isMobile ? theme.spacing(0.5) : theme.spacing(1.5)),
-            fontSize: ({ isMobile }) => (isMobile ? '0.8rem' : '0.875rem'),
-            whiteSpace: 'nowrap',
-        },
-        record: {
-            display: 'flex',
-        },
-        coin: {
-            width: ({ isMobile }) => (isMobile ? 20 : 24),
-            height: ({ isMobile }) => (isMobile ? 20 : 24),
-        },
-        name: {
-            marginLeft: theme.spacing(1),
-            fontSize: ({ isMobile }) => (isMobile ? '0.9rem' : '1rem'),
-        },
-        chain: {
-            marginLeft: theme.spacing(1),
-        },
-        price: {
-            fontSize: ({ isMobile }) => (isMobile ? '0.9rem' : '1rem'),
-        },
-        more: {
-            color: theme.palette.text.primary,
-            fontSize: ({ isMobile }) => (isMobile ? '0.9rem' : '1rem'),
-        },
-        lessButton: {
-            display: 'flex',
-            justifyContent: 'center',
-            marginTop: theme.spacing(1),
-        },
-        menuAnchorElRef: {},
-    }),
-)
+        padding: theme.spacing(0),
+    },
+    head: {
+        backgroundColor: theme.palette.mode === 'light' ? theme.palette.common.white : 'var(--drawerBody)',
+    },
+    cell: {
+        paddingLeft: ({ isMobile }) => (isMobile ? theme.spacing(0.5) : theme.spacing(2)),
+        paddingRight: ({ isMobile }) => (isMobile ? theme.spacing(0.5) : theme.spacing(1.5)),
+        fontSize: ({ isMobile }) => (isMobile ? '0.8rem' : '0.875rem'),
+        whiteSpace: 'nowrap',
+    },
+    record: {
+        display: 'flex',
+    },
+    coin: {
+        width: ({ isMobile }) => (isMobile ? 20 : 24),
+        height: ({ isMobile }) => (isMobile ? 20 : 24),
+    },
+    name: {
+        marginLeft: theme.spacing(1),
+        fontSize: ({ isMobile }) => (isMobile ? '0.9rem' : '1rem'),
+    },
+    chain: {
+        marginLeft: theme.spacing(1),
+    },
+    price: {
+        fontSize: ({ isMobile }) => (isMobile ? '0.9rem' : '1rem'),
+    },
+    more: {
+        color: theme.palette.text.primary,
+        fontSize: ({ isMobile }) => (isMobile ? '0.9rem' : '1rem'),
+    },
+    lessButton: {
+        display: 'flex',
+        justifyContent: 'center',
+        marginTop: theme.spacing(1),
+    },
+}))
 
 //#region view detailed
 interface ViewDetailedProps extends WalletAssetsTableProps {
@@ -138,7 +136,7 @@ function ViewDetailed(props: ViewDetailedProps) {
                         justifyContent: 'flex-end',
                     }}>
                     <Typography className={classes.price} color="textPrimary" component="span">
-                        {formatCurrency(Number(getTokenUSDValue(asset).toFixed(2)), '$')}
+                        <FormattedCurrency value={getTokenUSDValue(asset).toFixed(2)} sign="$" />
                     </Typography>
                 </Box>,
                 ...(isMobile
@@ -168,7 +166,7 @@ function ViewDetailed(props: ViewDetailedProps) {
 const MIN_VALUE = 5
 
 export interface WalletAssetsTableProps extends withClasses<never> {
-    wallet: WalletRecord
+    wallet: Wallet
 }
 
 export function WalletAssetsTable(props: WalletAssetsTableProps) {
@@ -222,13 +220,13 @@ export function WalletAssetsTable(props: WalletAssetsTableProps) {
     const viewDetailedTokens = detailedTokens.filter(
         (x) =>
             new BigNumber(x.value?.[CurrencyType.USD] || '0').isGreaterThan(MIN_VALUE) ||
-            x.token.type === EthereumTokenType.Ether,
+            x.token.type === EthereumTokenType.Native,
     )
 
     return (
         <>
             <TableContainer className={classes.container}>
-                <Table className={classes.table} component="table" size="medium" stickyHeader>
+                <Table component="table" size="medium" stickyHeader>
                     <TableHead className={classes.head}>
                         <TableRow>
                             {LABELS.map((x, i) => (

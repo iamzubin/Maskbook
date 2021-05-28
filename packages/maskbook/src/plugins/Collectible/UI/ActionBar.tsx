@@ -1,6 +1,6 @@
-import { makeStyles, createStyles, Box } from '@material-ui/core'
+import { makeStyles, Box } from '@material-ui/core'
+import { useI18N } from '../../../utils'
 import { CollectibleState } from '../hooks/useCollectibleState'
-import { useI18N } from '../../../utils/i18n-next-ui'
 import ActionButton from '../../../extension/options-page/DashboardComponents/ActionButton'
 import { useControlledDialog } from './useControlledDialog'
 import { MakeOfferDialog } from './MakeOfferDialog'
@@ -9,7 +9,7 @@ import { ChainState } from '../../../web3/state/useChainState'
 import { CheckoutDialog } from './CheckoutDialog'
 
 const useStyles = makeStyles((theme) => {
-    return createStyles({
+    return {
         root: {
             marginLeft: theme.spacing(-0.5),
             marginRight: theme.spacing(-0.5),
@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => {
             flex: 1,
             margin: `0 ${theme.spacing(0.5)}`,
         },
-    })
+    }
 })
 
 export interface ActionBarProps {}

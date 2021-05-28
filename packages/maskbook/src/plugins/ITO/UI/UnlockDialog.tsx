@@ -1,20 +1,19 @@
-import { createStyles, Link, makeStyles, Typography } from '@material-ui/core'
+import { Link, makeStyles, Typography } from '@material-ui/core'
 import BigNumber from 'bignumber.js'
 import { useCallback, useState } from 'react'
 import { v4 as uuid } from 'uuid'
+import { formatBalance, FormattedAddress } from '@dimensiondev/maskbook-shared'
+import { useRemoteControlledDialog, useI18N } from '../../../utils'
 import ActionButton from '../../../extension/options-page/DashboardComponents/ActionButton'
-import { useRemoteControlledDialog } from '../../../utils/hooks/useRemoteControlledDialog'
-import { useI18N } from '../../../utils/i18n-next-ui'
 import { useAccount } from '../../../web3/hooks/useAccount'
-import { useChainId } from '../../../web3/hooks/useBlockNumber'
+import { useChainId } from '../../../web3/hooks/useChainId'
 import { useConstant } from '../../../web3/hooks/useConstant'
 import { useTokenBalance } from '../../../web3/hooks/useTokenBalance'
-import { resolveLinkOnEtherscan } from '../../../web3/pipes'
+import { resolveAddressLinkOnExplorer } from '../../../web3/pipes'
 import { ERC20TokenDetailed, EthereumTokenType } from '../../../web3/types'
 import { EthereumERC20TokenApprovedBoundary } from '../../../web3/UI/EthereumERC20TokenApprovedBoundary'
 import { EthereumWalletConnectedBoundary } from '../../../web3/UI/EthereumWalletConnectedBoundary'
 import { TokenAmountPanel } from '../../../web3/UI/TokenAmountPanel'
-import { formatBalance, formatEthereumAddress } from '../../Wallet/formatter'
 import { SelectTokenDialogEvent, WalletMessages } from '../../Wallet/messages'
 import { ITO_CONSTANTS } from '../constants'
 
@@ -22,18 +21,16 @@ function isMoreThanMillion(allowance: string, decimals: number) {
     return new BigNumber(allowance).isGreaterThan(`100000000000e${decimals}`) // 100 billion
 }
 
-const useStyles = makeStyles((theme) =>
-    createStyles({
-        root: {},
-        tip: {
-            margin: theme.spacing(1.5, 0, 1),
-            fontSize: 10,
-        },
-        button: {
-            marginTop: theme.spacing(1.5),
-        },
-    }),
-)
+const useStyles = makeStyles((theme) => ({
+    root: {},
+    tip: {
+        margin: theme.spacing(1.5, 0, 1),
+        fontSize: 10,
+    },
+    button: {
+        marginTop: theme.spacing(1.5),
+    },
+}))
 
 export interface UnlockDialogProps {
     tokens: ERC20TokenDetailed[]
@@ -52,7 +49,7 @@ export function UnlockDialog(props: UnlockDialogProps) {
     //#region select token
     const [token, setToken] = useState<ERC20TokenDetailed>(tokens[0])
     const [id] = useState(uuid())
-    const [, setSelectTokenDialogOpen] = useRemoteControlledDialog(
+    const { setDialog: setSelectTokenDialog } = useRemoteControlledDialog(
         WalletMessages.events.selectTokenDialogUpdated,
         useCallback(
             (ev: SelectTokenDialogEvent) => {
@@ -64,10 +61,10 @@ export function UnlockDialog(props: UnlockDialogProps) {
         ),
     )
     const onSelectTokenChipClick = useCallback(() => {
-        setSelectTokenDialogOpen({
+        setSelectTokenDialog({
             open: true,
             uuid: id,
-            disableEther: true,
+            disableNativeToken: true,
             disableSearchBar: true,
             FixedTokenListProps: {
                 selectedTokens: token ? [token.address] : [],
@@ -81,7 +78,7 @@ export function UnlockDialog(props: UnlockDialogProps) {
     const [rawAmount, setRawAmount] = useState('')
     const amount = new BigNumber(rawAmount || '0').multipliedBy(new BigNumber(10).pow(token?.decimals ?? 0))
     const { value: tokenBalance = '0', loading: loadingTokenBalance } = useTokenBalance(
-        token?.type ?? EthereumTokenType.Ether,
+        token?.type ?? EthereumTokenType.Native,
         token?.address ?? '',
     )
     //#endregion
@@ -108,8 +105,8 @@ export function UnlockDialog(props: UnlockDialogProps) {
                 <Link
                     target="_blank"
                     rel="noopener noreferrer"
-                    href={`${resolveLinkOnEtherscan(chainId)}/address/${recipientAddress}`}>
-                    {formatEthereumAddress(recipientAddress, 4)}
+                    href={resolveAddressLinkOnExplorer(chainId, recipientAddress)}>
+                    <FormattedAddress address={recipientAddress} size={4} />
                 </Link>{' '}
                 to use your {token.symbol ?? 'Token'} tokens when a new ITO round starts later.
             </Typography>
@@ -118,10 +115,10 @@ export function UnlockDialog(props: UnlockDialogProps) {
                     {(allowance: string) => (
                         <ActionButton className={classes.button} size="large" fullWidth disabled variant="contained">
                             {isMoreThanMillion(allowance, token.decimals)
-                                ? t('plugin_ito_amount_approved_infinity', {
+                                ? t('plugin_ito_amount_unlocked_infinity', {
                                       symbol: token.symbol ?? 'Token',
                                   })
-                                : t('plugin_ito_amount_approved', {
+                                : t('plugin_ito_amount_unlocked', {
                                       amount: formatBalance(allowance, token.decimals, 2),
                                       symbol: token.symbol ?? 'Token',
                                   })}

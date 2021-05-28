@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 import {
     makeStyles,
-    createStyles,
     Accordion,
     AccordionSummary,
     Typography,
@@ -13,27 +12,24 @@ import {
     Button,
     DialogContent,
 } from '@material-ui/core'
+import { getEnumAsArray, useI18N, useRemoteControlledDialog, useValueRef } from '../../../../utils'
 import { ZrxTradePool, TradeProvider } from '../../types'
 import { SelectPoolPanel } from './SelectPoolPanel'
 import { SlippageSlider } from './SlippageSlider'
 import { useStylesExtends } from '../../../../components/custom-ui-helper'
-import { getEnumAsArray } from '../../../../utils/enum'
 import {
     currentSlippageTolerance,
     currentTradeProviderSettings,
     getCurrentTradeProviderGeneralSettings,
 } from '../../settings'
 import { SLIPPAGE_TOLERANCE_DEFAULT } from '../../constants'
-import { useI18N } from '../../../../utils/i18n-next-ui'
 import { InjectedDialog } from '../../../../components/shared/InjectedDialog'
-import { useRemoteControlledDialog } from '../../../../utils/hooks/useRemoteControlledDialog'
 import { PluginTraderMessages } from '../../messages'
-import { useValueRef } from '../../../../utils/hooks/useValueRef'
 import stringify from 'json-stable-stringify'
 import { useTradeProviderSettings } from '../../trader/useTradeSettings'
 
 const useStyles = makeStyles((theme) => {
-    return createStyles({
+    return {
         content: {},
         footer: {
             display: 'flex',
@@ -50,7 +46,7 @@ const useStyles = makeStyles((theme) => {
         details: {
             display: 'flex',
         },
-    })
+    }
 })
 
 export interface SettingsDialogProps extends withClasses<'root'> {}
@@ -64,12 +60,7 @@ export function SettingsDialog(props: SettingsDialogProps) {
     const { pools } = useTradeProviderSettings(provider)
 
     //#region remote controlled dialog
-    const [open, setOpen] = useRemoteControlledDialog(PluginTraderMessages.events.swapSettingsUpdated)
-    const onClose = useCallback(() => {
-        setOpen({
-            open: false,
-        })
-    }, [setOpen])
+    const { open, closeDialog } = useRemoteControlledDialog(PluginTraderMessages.events.swapSettingsUpdated)
     //#endregion
 
     const onReset = useCallback(() => {
@@ -82,14 +73,20 @@ export function SettingsDialog(props: SettingsDialogProps) {
     }, [provider])
 
     return (
-        <InjectedDialog open={open} onClose={onClose} title="Swap Settings" DialogProps={{ maxWidth: 'xs' }}>
+        <InjectedDialog
+            open={open}
+            onClose={closeDialog}
+            title={t('plugin_trader_swap_settings')}
+            DialogProps={{ maxWidth: 'xs' }}>
             <DialogContent className={classes.content}>
                 <Paper component="section" elevation={0}>
                     <Card elevation={0}>
                         <CardContent>
                             <Accordion className={classes.accordion} elevation={0}>
                                 <AccordionSummary>
-                                    <Typography className={classes.heading}>Slippage Tolerance</Typography>
+                                    <Typography className={classes.heading}>
+                                        {t('plugin_trader_slipage_tolerance')}
+                                    </Typography>
                                     <Typography className={classes.subheading}>{slippage / 100}%</Typography>
                                 </AccordionSummary>
                                 <AccordionDetails className={classes.details}>
@@ -121,7 +118,7 @@ export function SettingsDialog(props: SettingsDialogProps) {
                             ) : null}
                         </CardContent>
                         <CardActions className={classes.footer}>
-                            <Button variant="text" onClick={onClose}>
+                            <Button variant="text" onClick={closeDialog}>
                                 {t('confirm')}
                             </Button>
                             <Button variant="text" onClick={onReset}>

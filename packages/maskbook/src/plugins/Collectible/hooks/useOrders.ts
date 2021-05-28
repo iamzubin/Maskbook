@@ -3,7 +3,7 @@ import { OrderSide } from 'opensea-js/lib/types'
 import type { CollectibleToken, NFTOrder, OpenSeaCustomAccount } from '../types'
 import { CollectibleProvider } from '../types'
 import { PluginCollectibleRPC } from '../messages'
-import { unreachable } from '../../../utils/utils'
+import { unreachable } from '@dimensiondev/maskbook-shared'
 import BigNumber from 'bignumber.js'
 import { getOrderUnitPrice } from '../utils'
 import { OpenSeaAccountURL } from '../constants'
@@ -27,7 +27,7 @@ export function useOrders(provider: CollectibleProvider, token?: CollectibleToke
                     const unitPrice = new BigNumber(getOrderUnitPrice(order) ?? 0).toNumber()
                     return {
                         quantity: new BigNumber(order.quantity).toNumber(),
-                        expirationTime: order.expirationTime,
+                        expirationTime: order.side === OrderSide.Sell ? order.listingTime : order.expirationTime,
                         paymentTokenContract: order.paymentTokenContract,
                         hash: order.hash,
                         unitPrice,

@@ -1,34 +1,33 @@
-import { makeStyles, createStyles, Typography } from '@material-ui/core'
+import { makeStyles, Typography } from '@material-ui/core'
 import type { RedPacketJSONPayload } from '../types'
 import { FixedSizeList, FixedSizeListProps } from 'react-window'
 import { RedPacketInList } from './RedPacketInList'
 import { useRedPacketsFromChain } from '../hooks/useRedPacket'
 import { usePayloadsComputed } from '../hooks/usePayloadComputed'
-import { useChainIdValid } from '../../../web3/hooks/useBlockNumber'
+import { useChainIdValid } from '../../../web3/hooks/useChainId'
+import { useI18N } from '../../../utils'
 
 //#region red packet list UI
-const useStyles = makeStyles((theme) =>
-    createStyles({
-        root: {
-            display: 'flex',
-            width: '100%',
-            height: '100%',
-            flexDirection: 'column',
-            margin: '0 auto',
+const useStyles = makeStyles((theme) => ({
+    root: {
+        display: 'flex',
+        width: '100%',
+        height: '100%',
+        flexDirection: 'column',
+        margin: '0 auto',
+    },
+    list: {
+        width: '100%',
+        overflow: 'auto',
+        scrollbarWidth: 'none',
+        '&::-webkit-scrollbar': {
+            display: 'none',
         },
-        list: {
-            width: '100%',
-            overflow: 'auto',
-            scrollbarWidth: 'none',
-            '&::-webkit-scrollbar': {
-                display: 'none',
-            },
-        },
-        placeholder: {
-            textAlign: 'center',
-        },
-    }),
-)
+    },
+    placeholder: {
+        textAlign: 'center',
+    },
+}))
 
 interface RedPacketListProps {
     loading?: boolean
@@ -38,17 +37,18 @@ interface RedPacketListProps {
 }
 
 function RedPacketList(props: RedPacketListProps) {
+    const { t } = useI18N()
     const { loading = false, payloads, FixedSizeListProps, onSelect } = props
     const classes = useStyles()
     return (
         <div className={classes.root}>
             {loading ? (
                 <Typography className={classes.placeholder} color="textSecondary">
-                    Loading...
+                    {t('plugin_dhedge_loading')}
                 </Typography>
             ) : payloads.length === 0 ? (
                 <Typography className={classes.placeholder} color="textSecondary">
-                    No Data
+                    {t('plugin_dhedge_no_data')}
                 </Typography>
             ) : (
                 <FixedSizeList

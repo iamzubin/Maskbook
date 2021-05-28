@@ -1,19 +1,19 @@
 import BigNumber from 'bignumber.js'
 import { useMemo } from 'react'
-import type { ERC20TokenDetailed, EtherTokenDetailed } from '../../../../web3/types'
+import type { FungibleTokenDetailed } from '../../../../web3/types'
 import type { SwapQuoteResponse, TradeComputed, TradeStrategy } from '../../types'
 
 export function useTradeComputed(
     trade: SwapQuoteResponse | null,
     strategy: TradeStrategy,
-    inputToken?: EtherTokenDetailed | ERC20TokenDetailed,
-    outputToken?: EtherTokenDetailed | ERC20TokenDetailed,
+    inputToken?: FungibleTokenDetailed,
+    outputToken?: FungibleTokenDetailed,
 ) {
     return useMemo(() => {
         if (!trade) return null
         if (!inputToken || !outputToken) return null
         const inputAmount = new BigNumber(trade.sellAmount)
-        const executionPrice = new BigNumber(trade.buyTokenToEthRate).dividedBy(new BigNumber(trade.sellTokenToEthRate))
+        const executionPrice = new BigNumber(trade.buyTokenToEthRate).dividedBy(trade.sellTokenToEthRate)
         const outputAmount = inputAmount.multipliedBy(executionPrice).dp(0)
         return {
             strategy,

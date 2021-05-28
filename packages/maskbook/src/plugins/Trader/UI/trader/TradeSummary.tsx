@@ -2,7 +2,6 @@ import { useState } from 'react'
 import BigNumber from 'bignumber.js'
 import {
     makeStyles,
-    createStyles,
     Paper,
     List,
     ListItem,
@@ -15,8 +14,8 @@ import LoopIcon from '@material-ui/icons/Loop'
 import { ONE_BIPS } from '../../constants'
 import { useStylesExtends } from '../../../../components/custom-ui-helper'
 import { SwapQuoteResponse, TradeComputed, TradeProvider, TradeStrategy } from '../../types'
-import { formatBalance, formatPercentage } from '../../../Wallet/formatter'
-import type { ERC20TokenDetailed, EtherTokenDetailed } from '../../../../web3/types'
+import { formatBalance, formatPercentage } from '@dimensiondev/maskbook-shared'
+import type { FungibleTokenDetailed } from '../../../../web3/types'
 import { resolveUniswapWarningLevel, resolveUniswapWarningLevelColor, resolveZrxTradePoolName } from '../../pipes'
 
 type SummaryRecord = {
@@ -25,49 +24,47 @@ type SummaryRecord = {
     children?: React.ReactNode
 } | null
 
-const useStyles = makeStyles((theme) =>
-    createStyles({
-        root: {
-            width: '100%',
-            boxSizing: 'border-box',
-            margin: theme.spacing(0, 'auto', 2),
-        },
-        iconButton: {
-            marginLeft: theme.spacing(0.5),
-        },
-        icon: {
-            fontSize: '0.75em !important',
-        },
-        list: {},
-        item: {
-            paddingTop: 0,
-            paddingBottom: 0,
-        },
-        title: {
-            fontSize: 12,
-            color: theme.palette.text.secondary,
-            display: 'flex',
-            alignItems: 'center',
-        },
-        content: {
-            fontSize: 12,
-            color: theme.palette.text.secondary,
-            paddingLeft: theme.spacing(15),
-            textAlign: 'right',
-        },
-        emphasis: {
-            color: theme.palette.text.primary,
-            fontWeight: 300,
-            margin: `0 ${theme.spacing(0.5)}`,
-        },
-    }),
-)
+const useStyles = makeStyles((theme) => ({
+    root: {
+        width: '100%',
+        boxSizing: 'border-box',
+        margin: theme.spacing(0, 'auto', 2),
+    },
+    iconButton: {
+        marginLeft: theme.spacing(0.5),
+    },
+    icon: {
+        fontSize: '0.75em !important',
+    },
+    list: {},
+    item: {
+        paddingTop: 0,
+        paddingBottom: 0,
+    },
+    title: {
+        fontSize: 12,
+        color: theme.palette.text.secondary,
+        display: 'flex',
+        alignItems: 'center',
+    },
+    content: {
+        fontSize: 12,
+        color: theme.palette.text.secondary,
+        paddingLeft: theme.spacing(15),
+        textAlign: 'right',
+    },
+    emphasis: {
+        color: theme.palette.text.primary,
+        fontWeight: 300,
+        margin: `0 ${theme.spacing(0.5)}`,
+    },
+}))
 
 export interface TradeSummaryProps extends withClasses<never> {
     trade: TradeComputed
     provider: TradeProvider
-    inputToken: EtherTokenDetailed | ERC20TokenDetailed
-    outputToken: EtherTokenDetailed | ERC20TokenDetailed
+    inputToken: FungibleTokenDetailed
+    outputToken: FungibleTokenDetailed
 }
 
 export function TradeSummary(props: TradeSummaryProps) {

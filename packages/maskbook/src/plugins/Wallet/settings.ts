@@ -1,6 +1,6 @@
 import { createGlobalSettings } from '../../settings/createSettings'
 import { i18n } from '../../utils/i18n-next'
-import { ProviderType } from '../../web3/types'
+import { ChainId, ProviderType } from '../../web3/types'
 import { PLUGIN_IDENTIFIER } from './constants'
 import { CollectibleProvider, PortfolioProvider } from './types'
 
@@ -58,5 +58,57 @@ export const currentCollectibleDataProviderSettings = createGlobalSettings<Colle
     {
         primary: () => i18n.t('plugin_wallet_settings_collectible_data_source_primary'),
         secondary: () => i18n.t('plugin_wallet_settings_collectible_data_source_secondary'),
+    },
+)
+
+/**
+ * The block number state
+ */
+export const currentBlockNumberSettings = createGlobalSettings<number>(`${PLUGIN_IDENTIFIER}+blockNumber`, 0, {
+    primary: () => 'DO NOT DISPLAY IT IN UI',
+})
+
+/**
+ * Chain Id of Mask Network
+ */
+export const currentMaskbookChainIdSettings = createGlobalSettings<ChainId>(
+    `${PLUGIN_IDENTIFIER}+MaskChainId`,
+    ChainId.Mainnet,
+    {
+        primary: () => i18n.t('settings_choose_eth_network'),
+        secondary: () => 'This only affects the built-in wallet.',
+    },
+)
+
+/**
+ * Chain Id of MetaMask
+ */
+export const currentMetaMaskChainIdSettings = createGlobalSettings<ChainId>(
+    `${PLUGIN_IDENTIFIER}+MetaMaskChainID`,
+    ChainId.Mainnet,
+    {
+        primary: () => 'DO NOT DISPLAY IT IN UI',
+    },
+)
+
+/**
+ * Chain Id of WalletConnect
+ */
+export const currentWalletConnectChainIdSettings = createGlobalSettings<ChainId>(
+    `${PLUGIN_IDENTIFIER}+WalletConnectChainId`,
+    ChainId.Mainnet,
+    {
+        primary: () => 'DO NOT DISPLAY IT IN UI',
+    },
+)
+
+/**
+ * Chain Id of CustomNetwork
+ */
+export const currentCustomNetworkChainIdSettings = createGlobalSettings<ChainId>(
+    `${PLUGIN_IDENTIFIER}+CustomNetworkChainId`,
+    ChainId.Mainnet,
+    {
+        primary: () => 'DO NOT DISPLAY IT IN UI',
     },
 )

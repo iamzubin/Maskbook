@@ -1,5 +1,5 @@
 import { Network } from 'opensea-js'
-import { unreachable } from '../../../utils/utils'
+import { unreachable } from '@dimensiondev/maskbook-shared'
 import { ChainId } from '../../../web3/types'
 import { NullAddress, RaribleRopstenUserURL, RaribleUserURL } from '../constants'
 import { CollectibleProvider, OpenSeaAssetEventType, RaribleEventType } from '../types'
@@ -80,6 +80,14 @@ export function resolveLinkOnOpenSea(chainId: ChainId) {
         default:
             return 'https://opensea.io'
     }
+}
+
+export function resolveTraitLinkOnOpenSea(chainId: ChainId, slug: string, search: string, value: string) {
+    if (chainId === ChainId.Rinkeby) {
+        return `https://testnets.opensea.io/assets/${slug}?search[stringTraits][0][name]=${search}&search[stringTraits][0][values][0]=${value}`
+    }
+
+    return `https://opensea.io/assets/${slug}?search[stringTraits][0][name]=${search}&search[stringTraits][0][values][0]=${value}`
 }
 
 export function resolveAssetLinkOnOpenSea(chainId: ChainId, address: string, id: string) {

@@ -1,6 +1,6 @@
 import {
     useMediaQuery,
-    Toolbar as MuiToolbar,
+    Toolbar,
     Theme,
     Typography,
     AppBar,
@@ -9,9 +9,8 @@ import {
     Drawer,
     experimentalStyled as styled,
     Box,
-    toolbarClasses,
-    Backdrop,
     paperClasses,
+    makeStyles,
 } from '@material-ui/core'
 import { Menu as MenuIcon, Close as CloseIcon } from '@material-ui/icons'
 import Color from 'color'
@@ -74,17 +73,6 @@ const MaskLogo = styled(Grid)`
     }
 `
 
-const Toolbar = styled(MuiToolbar)(({ theme }) => ({
-    [`&.${toolbarClasses.gutters}`]: {
-        [theme.breakpoints.up('lg')]: {
-            paddingLeft: theme.spacing(0),
-        },
-        [theme.breakpoints.down('lg')]: {
-            paddingLeft: theme.spacing(1),
-        },
-    },
-}))
-
 const MenuButton = styled(IconButton)(({ theme }) => ({
     paddingLeft: theme.spacing(1.5),
     paddingRight: theme.spacing(1.5),
@@ -100,10 +88,9 @@ const PageTitle = styled(Grid)(({ theme }) => ({
 }))
 
 const Containment = styled(Grid)(({ theme }) => ({
-    overflow: 'auto',
     contain: 'strict',
     [theme.breakpoints.down('lg')]: {
-        minHeight: '100vh',
+        minHeight: `calc(100vh - 64px)`,
     },
 }))
 
@@ -118,30 +105,40 @@ const NavigationDrawer = styled(Drawer)(({ theme }) => ({
         backdropFilter: 'blur(4px)',
     },
 }))
-const NavigationDrawerBackdrop = styled(Backdrop)(({ theme }) => ({
-    top: theme.mixins.toolbar.minHeight,
-}))
 
 const ShapeHelper = styled('div')(({ theme }) => ({
     height: '100%',
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     borderTopLeftRadius: Number(theme.shape.borderRadius) * 5,
     borderTopRightRadius: Number(theme.shape.borderRadius) * 5,
     backgroundColor: theme.palette.background.default,
-    paddingBottom: 0,
+    overflow: 'auto',
 }))
 
 const ShapeContainer = styled('div')(({ theme }) => ({
     height: '100%',
-    padding: theme.spacing(2),
     borderTopLeftRadius: Number(theme.shape.borderRadius) * 5,
     borderTopRightRadius: Number(theme.shape.borderRadius) * 5,
-    backgroundColor: theme.palette.background.paper,
+}))
+
+const useStyle = makeStyles((theme) => ({
+    toolbarGutters: {
+        [theme.breakpoints.up('lg')]: {
+            paddingLeft: theme.spacing(0),
+        },
+        [theme.breakpoints.down('lg')]: {
+            paddingLeft: theme.spacing(1),
+        },
+    },
+    shapeContainerWithBackground: {
+        backgroundColor: theme.palette.background.paper,
+    },
 }))
 
 export interface PageFrameProps extends React.PropsWithChildren<{}> {
     title: React.ReactNode | string
     primaryAction?: React.ReactNode
+    noBackgroundFill?: boolean
 }
 
 export const PageFrame = memo((props: PageFrameProps) => {
@@ -149,11 +146,12 @@ export const PageFrame = memo((props: PageFrameProps) => {
     const right = props.primaryAction
     const isLargeScreen = useMediaQuery<Theme>((theme) => theme.breakpoints.up('lg'))
     const { drawerOpen, toggleDrawer } = useContext(DashboardContext)
+    const classes = useStyle()
 
     return (
         <>
             <AppBar position="relative" color="inherit" elevation={0}>
-                <Toolbar>
+                <Toolbar classes={{ gutters: classes.toolbarGutters }}>
                     {!isLargeScreen && (
                         <MaskLogo item container alignItems="center">
                             <MenuButton onClick={toggleDrawer}>{drawerOpen ? <CloseIcon /> : <MenuIcon />}</MenuButton>
@@ -172,15 +170,15 @@ export const PageFrame = memo((props: PageFrameProps) => {
                     <NavigationDrawer
                         open={drawerOpen}
                         onClose={toggleDrawer}
-                        BackdropComponent={NavigationDrawerBackdrop}
-                        BackdropProps={{ invisible: true }}
+                        hideBackdrop
                         variant="temporary"
-                        PaperProps={{ elevation: 0 }}>
+                        elevation={0}>
                         <Navigation />
                     </NavigationDrawer>
                 )}
                 <ShapeHelper>
-                    <ShapeContainer>
+                    <ShapeContainer
+                        className={props.noBackgroundFill ? undefined : classes.shapeContainerWithBackground}>
                         <ErrorBoundary>{props.children}</ErrorBoundary>
                     </ShapeContainer>
                 </ShapeHelper>

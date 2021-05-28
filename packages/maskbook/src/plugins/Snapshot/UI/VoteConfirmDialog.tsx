@@ -8,49 +8,46 @@ import {
     DialogContent,
     DialogActions,
     CircularProgress,
-    createStyles,
     makeStyles,
 } from '@material-ui/core'
 import millify from 'millify'
 import OpenInNew from '@material-ui/icons/OpenInNew'
 import type { ProposalMessage } from '../types'
-import { resolveBlockLinkOnEtherscan } from '../../../web3/pipes'
-import { useI18N } from '../../../utils/i18n-next-ui'
+import { resolveBlockLinkOnExplorer } from '../../../web3/pipes'
+import { useI18N } from '../../../utils'
 import { InjectedDialog } from '../../../components/shared/InjectedDialog'
 import { ChainId } from '../../../web3/types'
 import { InfoField } from './InformationCard'
 import { EthereumWalletConnectedBoundary } from '../../../web3/UI/EthereumWalletConnectedBoundary'
 
-const useStyles = makeStyles((theme) =>
-    createStyles({
-        card: {
-            padding: 0,
-            border: `solid 1px ${theme.palette.divider}`,
-            margin: `${theme.spacing(2)} auto`,
-        },
-        content: {
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            boxSizing: 'border-box',
-        },
-        button: {
-            width: '60%',
-            minHeight: 39,
-            margin: `${theme.spacing(1)} auto`,
-        },
-        link: {
-            display: 'flex',
-            color: 'inherit',
-            alignItems: 'center',
-            marginLeft: theme.spacing(1),
-            textDecoration: 'none !important',
-        },
-        loading: {
-            color: theme.palette.text.primary,
-        },
-    }),
-)
+const useStyles = makeStyles((theme) => ({
+    card: {
+        padding: 0,
+        border: `solid 1px ${theme.palette.divider}`,
+        margin: `${theme.spacing(2)} auto`,
+    },
+    content: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        boxSizing: 'border-box',
+    },
+    button: {
+        width: '60%',
+        minHeight: 39,
+        margin: `${theme.spacing(1)} auto`,
+    },
+    link: {
+        display: 'flex',
+        color: 'inherit',
+        alignItems: 'center',
+        marginLeft: theme.spacing(1),
+        textDecoration: 'none !important',
+    },
+    loading: {
+        color: theme.palette.text.primary,
+    },
+}))
 
 interface VoteConfirmDialogProps {
     open: boolean
@@ -91,7 +88,7 @@ export function VoteConfirmDialog(props: VoteConfirmDialogProps) {
                                     className={classes.link}
                                     target="_blank"
                                     rel="noopener"
-                                    href={resolveBlockLinkOnEtherscan(ChainId.Mainnet, message.payload.snapshot)}>
+                                    href={resolveBlockLinkOnExplorer(ChainId.Mainnet, message.payload.snapshot)}>
                                     {message.payload.snapshot}
                                     <OpenInNew fontSize="small" />
                                 </Link>
