@@ -24,6 +24,10 @@ import { useValueRef } from '../../utils/hooks/useValueRef'
 import { activatedSocialNetworkUI } from '../../social-network'
 import Services from '../../extension/service'
 import { SelectRecipientsUI, SelectRecipientsUIProps } from '../shared/SelectRecipients/SelectRecipients'
+import {
+    SelectRecipientsUnlockUI,
+    SelectRecipientsUnlockUIProps,
+} from '../shared/SelectRecipients/SelectRecipientsUnlock'
 import { ClickableChip } from '../shared/SelectRecipients/ClickableChip'
 import {
     TypedMessage,
@@ -48,6 +52,8 @@ import { editActivatedPostMetadata, globalTypedMessageMetadata } from '../../pro
 import { isTwitter } from '../../social-network-adaptor/twitter.com/base'
 import { SteganographyTextPayload } from './SteganographyTextPayload'
 import { Plugin, useActivatedPluginsSNSAdaptor } from '@dimensiondev/mask-plugin-infra'
+import type { UnlockLocks } from '../../extension/background-script/UnlockProtocolServices/types'
+import { useAccount } from '../../web3/hooks/useAccount'
 
 const defaultTheme = {}
 
@@ -77,6 +83,8 @@ export interface PostDialogUIProps extends withClasses<never> {
     maxLength?: number
     availableShareTarget: Array<Profile | Group>
     currentShareTarget: Array<Profile | Group>
+    availableUnlockTarget: UnlockLocks[]
+    currentUnlockTarget: UnlockLocks[]
     currentIdentity: Profile | null
     postContent: TypedMessage
     postBoxButtonDisabled: boolean
@@ -87,6 +95,7 @@ export interface PostDialogUIProps extends withClasses<never> {
     onFinishButtonClicked: () => void
     onCloseButtonClicked: () => void
     onSetSelected: SelectRecipientsUIProps['onSetSelected']
+    onSetUnlockSelected: SelectRecipientsUnlockUIProps['onSetUnlockSelected']
     DialogProps?: Partial<DialogProps>
     SelectRecipientsUIProps?: Partial<SelectRecipientsUIProps>
 }
@@ -207,6 +216,11 @@ export function PostDialogUI(props: PostDialogUIProps) {
                                     onClick={() => props.onOnlyMyselfChanged(!props.onlyMyself)}
                                 />
                             </SelectRecipientsUI>
+                            <SelectRecipientsUnlockUI
+                                itemsUnlock={props.availableUnlockTarget}
+                                selectedUnlock={props.currentUnlockTarget}
+                                onSetUnlockSelected={props.onSetUnlockSelected}
+                                {...props.SelectRecipientsUIProps}></SelectRecipientsUnlockUI>
                         </Box>
 
                         <Typography style={{ marginBottom: 10 }}>{t('post_dialog__more_options_title')}</Typography>
@@ -264,7 +278,7 @@ export interface PostDialogProps extends Omit<Partial<PostDialogUIProps>, 'open'
     open?: [boolean, (next: boolean) => void]
     reason?: 'timeline' | 'popup'
     identities?: Profile[]
-    onRequestPost?: (target: (Profile | Group)[], content: TypedMessage) => void
+    onRequestPost?: (target: (Profile | Group)[], unlockTarget: UnlockLocks[], content: TypedMessage) => void
     onRequestReset?: () => void
     typedMessageMetadata?: ReadonlyMap<string, any>
 }
@@ -296,6 +310,33 @@ export function PostDialog({ reason: props_reason = 'timeline', ...props }: Post
     const currentIdentity = or(props.currentIdentity, useCurrentIdentity())
     const [currentShareTarget, setCurrentShareTarget] = useState<(Profile | Group)[]>(() => [])
     //#endregion
+
+    //#regionUnlock
+    const [currentUnlockTarget, setCurrentUnlockTarget] = useState<UnlockLocks[]>(() => [])
+    const [availableUnlockTarget, setAvailableUnlockTarget] = useState<UnlockLocks[]>(() => [])
+    //#endregion
+    const addr = useAccount()
+    useEffect(() => {
+        setTimeout(() => {
+            // Services.UnlockProtocol.getLocks(addr) UNCOMMENT
+            Services.UnlockProtocol.getLocks('0x33ab07dF7f09e793dDD1E9A25b079989a557119A')
+                .then(function (value) {
+                    setAvailableUnlockTarget(value.lockManagers)
+                })
+                .catch((error) => {
+                    setAvailableUnlockTarget([
+                        {
+                            lock: {
+                                name: error.message || 'Some error occured',
+                                address: '0x0',
+                                price: '0',
+                            },
+                        },
+                    ])
+                })
+        }, 3000)
+    })
+
     //#region Image Based Payload Switch
     const imagePayloadStatus = useValueRef(currentImagePayloadStatus[activatedSocialNetworkUI.networkIdentifier])
     const imagePayloadEnabled = imagePayloadStatus === 'true'
@@ -310,10 +351,11 @@ export function PostDialog({ reason: props_reason = 'timeline', ...props }: Post
     const onRequestPost = or(
         props.onRequestPost,
         useCallback(
-            async (target: (Profile | Group)[], content: TypedMessage) => {
+            async (target: (Profile | Group)[], unlockTarget: UnlockLocks[], content: TypedMessage) => {
                 const [encrypted, token] = await Services.Crypto.encryptTo(
                     content,
                     target.map((x) => x.identifier),
+                    unlockTarget.map((x) => x.lock.address),
                     currentIdentity!.identifier,
                     !!shareToEveryone,
                 )
@@ -380,7 +422,7 @@ export function PostDialog({ reason: props_reason = 'timeline', ...props }: Post
         }, [setOpen]),
     )
     const onFinishButtonClicked = useCallback(() => {
-        onRequestPost(onlyMyself ? [currentIdentity!] : currentShareTarget, postBoxContent)
+        onRequestPost(onlyMyself ? [currentIdentity!] : currentShareTarget, currentUnlockTarget, postBoxContent)
         onRequestReset()
     }, [currentIdentity, currentShareTarget, onRequestPost, onRequestReset, onlyMyself, postBoxContent])
     const onCloseButtonClicked = useCallback(() => {
@@ -440,11 +482,14 @@ export function PostDialog({ reason: props_reason = 'timeline', ...props }: Post
             imagePayload={!textOnly && (imageOnly || imagePayloadEnabled)}
             imagePayloadUnchangeable={imagePayloadButtonForzen}
             currentIdentity={currentIdentity}
+            availableUnlockTarget={availableUnlockTarget}
+            currentUnlockTarget={currentUnlockTarget}
             currentShareTarget={currentShareTarget}
             postContent={postBoxContent}
             postBoxButtonDisabled={isPostButtonDisabled}
             maxLength={560}
             onSetSelected={setCurrentShareTarget}
+            onSetUnlockSelected={setCurrentUnlockTarget}
             onPostContentChanged={setPostBoxContent}
             onShareToEveryoneChanged={onShareToEveryoneChanged}
             onOnlyMyselfChanged={onOnlyMyselfChanged}
