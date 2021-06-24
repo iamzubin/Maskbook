@@ -1,7 +1,8 @@
 import { PollMetadataReader } from '../Polls/utils'
 import { PluginConfig, PluginStage, PluginScope } from '../types'
 import { createCompositionDialog } from '../utils/createCompositionDialog'
-import { identifier, pluginDescription, pluginIcon, pluginName } from './constants'
+import { identifier, pluginDescription, pluginIcon, pluginMetaKey, pluginName } from './constants'
+import type { UnlockLocks } from './types'
 import UnlockProtocolDialog from './UI/UnlockProtocolDialog'
 
 const [UnlockProtocolCompositionEntry, UnlockProtocolCompositionUI] = createCompositionDialog(
@@ -24,5 +25,11 @@ export const UnlockProtocolPluginDefine: PluginConfig = {
         return null
     },
     PageComponent: UnlockProtocolCompositionUI,
+    postDialogMetadataBadge: new Map([
+        [
+            pluginMetaKey,
+            (meta: { post: string; target: UnlockLocks[] }) => `a locked post to ${meta.target.length} lock(s) `,
+        ],
+    ]),
     postDialogEntries: [UnlockProtocolCompositionEntry],
 }
