@@ -1,4 +1,7 @@
 export interface UnlockLocks {
-    lockaddress: string
-    lockname: string
+    lock: {
+        address: string
+        name: string
+        price?: string
+    }
 }

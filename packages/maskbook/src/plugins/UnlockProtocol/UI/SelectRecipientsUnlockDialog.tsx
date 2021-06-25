@@ -37,7 +37,7 @@ export function SelectRecipientsUnlockDialogUI(props: SelectRecipientsUnlockDial
     const { items, disabledItems } = props
     const itemsAfterSearch = useMemo(() => {
         const fuse = new Fuse(items, {
-            keys: ['lockname', 'lockaddress', 'nickname'],
+            keys: ['lock.name', 'lock.address'],
             isCaseSensitive: false,
             ignoreLocation: true,
             threshold: 0,
@@ -53,14 +53,14 @@ export function SelectRecipientsUnlockDialogUI(props: SelectRecipientsUnlockDial
                 <List style={{ height: items.length * LIST_ITEM_HEIGHT }} dense>
                     {itemsAfterSearch.length === 0 ? (
                         <ListItem>
-                            <ListItemText primary={JSON.stringify(items)} />
+                            <ListItemText primary="not_found_i18n" />
                         </ListItem>
                     ) : (
                         itemsAfterSearch.map((item) => (
                             <LockInList
                                 item={item}
                                 search={search}
-                                checked={props.selected.some((x) => x.lockaddress === item.lockaddress)}
+                                checked={props.selected.some((x) => x.lock.address === item.lock.address)}
                                 disabled={props.disabled || disabledItems?.includes(item)}
                                 onChange={(_, checked) => {
                                     if (checked) {

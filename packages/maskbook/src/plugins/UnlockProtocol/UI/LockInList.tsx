@@ -37,8 +37,8 @@ export interface LockInListProps extends withClasses<never> {
 export function LockInList(props: LockInListProps) {
     const classes = useStylesExtends(useStyle(), props)
     const lock = props.item
-    const name = lock.lockname
-    const secondary = lock.lockaddress
+    const name = lock.lock.name
+    const secondary = lock.lock.address
     const onClick = useCallback((ev) => props.onChange(ev, !props.checked), [props])
 
     return (
