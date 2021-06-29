@@ -4,8 +4,10 @@ import { useState } from 'react'
 import { InjectedDialog } from '../../../components/shared/InjectedDialog'
 import { editActivatedPostMetadata } from '../../../protocols/typed-message/global-state'
 import { pluginMetaKey } from '../constants'
+import { postUnlockData } from '../Services'
 import type { UnlockLocks } from '../types'
 import { PuginUnlockProtocolRPC } from '../utils'
+import { encryptUnlockData } from '../utils/crypto'
 import { SelectRecipientsUnlockDialogUI } from './SelectRecipientsUnlockDialog'
 
 interface UnlockProtocolDialogProps extends withClasses<'wrapper'> {
@@ -58,7 +60,22 @@ export default function UnlockProtocolDialog(props: UnlockProtocolDialogProps) {
                     next.delete(pluginMetaKey)
                 }
             })
-            props.onConfirm({ post: currentUnlockPost, target: currentUnlockTarget })
+
+            encryptUnlockData(currentUnlockPost).then((res) => {
+                var uploadData = {
+                    identifier: res.iv,
+                    unlockLocks: currentUnlockTarget,
+                    unlockKey: res.key,
+                }
+                postUnlockData(uploadData.toString()).then((res) => {
+                    if (res.body.message == 'success')
+                        props.onConfirm({ post: currentUnlockPost, target: currentUnlockTarget })
+                    else {
+                        return
+                    }
+                })
+            })
+            // Share the key with the keyshare server
         } else {
             return
         }
@@ -69,7 +86,7 @@ export default function UnlockProtocolDialog(props: UnlockProtocolDialogProps) {
             <DialogContent>
                 <TextField
                     id="outlined-multiline-static"
-                    label={currentUnlockPost}
+                    label="post_unlockProtocol_i18n"
                     // value={CurrentUnlockPost}
                     rows={4}
                     variant="outlined"
