@@ -6,7 +6,7 @@ export async function encryptUnlockData(content: string): Promise<{
     encrypted: ArrayBuffer
 }> {
     const iv: ArrayBuffer = crypto.getRandomValues(new Uint8Array(16))
-    const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length }, true, ['encrypt', 'decrypt'])
+    const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt'])
     const encrypted = await crypto.subtle.encrypt(
         { name: 'AES-GCM', iv },
         key,

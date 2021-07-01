@@ -1,9 +1,10 @@
-import { PollMetadataReader } from '../Polls/utils'
 import { PluginConfig, PluginStage, PluginScope } from '../types'
 import { createCompositionDialog } from '../utils/createCompositionDialog'
 import { identifier, pluginDescription, pluginIcon, pluginMetaKey, pluginName } from './constants'
 import type { UnlockLocks } from './types'
 import UnlockProtocolDialog from './UI/UnlockProtocolDialog'
+import UnlockProtocolInPost from './UI/UnlockProtocolInPost'
+import { UnlockProtocolMetadataReader } from './utils'
 
 const [UnlockProtocolCompositionEntry, UnlockProtocolCompositionUI] = createCompositionDialog(
     pluginIcon + ' ' + pluginName,
@@ -19,10 +20,10 @@ export const UnlockProtocolPluginDefine: PluginConfig = {
     stage: PluginStage.Development,
     scope: PluginScope.Public,
     successDecryptionInspector: function Comp(props) {
-        const metadata = PollMetadataReader(props.message.meta)
+        const metadata = UnlockProtocolMetadataReader(props.message.meta)
         if (!metadata.ok) return null
-        // return <UnlockProtocolInPost/>
-        return null
+        return <UnlockProtocolInPost {...props} />
+        // return null
     },
     PageComponent: UnlockProtocolCompositionUI,
     postDialogMetadataBadge: new Map([

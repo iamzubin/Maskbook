@@ -1,13 +1,10 @@
 // import { TextField } from '@dimensiondev/maskbook-theme/src/component-changes'
 import { DialogActions, DialogContent, DialogProps, TextField, Chip, Button } from '@material-ui/core'
+import { useEffect } from 'react'
 import { useState } from 'react'
 import { InjectedDialog } from '../../../components/shared/InjectedDialog'
-import { editActivatedPostMetadata } from '../../../protocols/typed-message/global-state'
-import { pluginMetaKey } from '../constants'
-import { postUnlockData } from '../Services'
 import type { UnlockLocks } from '../types'
 import { PuginUnlockProtocolRPC } from '../utils'
-import { encryptUnlockData } from '../utils/crypto'
 import { SelectRecipientsUnlockDialogUI } from './SelectRecipientsUnlockDialog'
 
 interface UnlockProtocolDialogProps extends withClasses<'wrapper'> {
@@ -22,13 +19,13 @@ export default function UnlockProtocolDialog(props: UnlockProtocolDialogProps) {
     // const { t } = useI18N()
     // var content : any = ""
     const [open, setOpen] = useState(false)
-
+    const [address, setAddress] = useState('0x3a574461fd1279FCF96043bcF416C53B7e8dcEC0')
     const [currentUnlockPost, setCurrentUnlockPost] = useState('')
     const [currentUnlockTarget, setCurrentUnlockTarget] = useState<UnlockLocks[]>(() => [])
     const [availableUnlockTarget, setAvailableUnlockTarget] = useState<UnlockLocks[]>(() => [])
     const { children } = props
 
-    setTimeout(() => {
+    useEffect(() => {
         PuginUnlockProtocolRPC.getLocks('0x3a574461fd1279FCF96043bcF416C53B7e8dcEC0')
             .then((value) => {
                 if (value.lockManagers.length) {
@@ -49,30 +46,22 @@ export default function UnlockProtocolDialog(props: UnlockProtocolDialogProps) {
                     },
                 ])
             })
-    }, 1000)
+    }, [address])
 
     const onInsert = () => {
         if (!!currentUnlockTarget.length && !!currentUnlockPost) {
-            editActivatedPostMetadata((next) => {
-                if (!!currentUnlockTarget.length && !!currentUnlockPost) {
-                    next.set(pluginMetaKey, { post: currentUnlockPost, target: currentUnlockTarget })
-                } else {
-                    next.delete(pluginMetaKey)
-                }
-            })
-
-            encryptUnlockData(currentUnlockPost).then((res) => {
+            PuginUnlockProtocolRPC.encryptUnlockData(currentUnlockPost).then((encres) => {
                 var uploadData = {
-                    identifier: res.iv,
+                    identifier: encres.iv,
                     unlockLocks: currentUnlockTarget,
-                    unlockKey: res.key,
+                    unlockKey: encres.key,
                 }
-                postUnlockData(uploadData.toString()).then((res) => {
-                    if (res.body.message == 'success')
-                        props.onConfirm({ post: currentUnlockPost, target: currentUnlockTarget })
-                    else {
-                        return
-                    }
+                PuginUnlockProtocolRPC.postUnlockData(uploadData).then((res) => {
+                    // if (res.body.message == 'success')
+                    //     props.onConfirm({ post: currentUnlockPost, target: currentUnlockTarget })
+                    // else {
+                    //     return
+                    // }
                 })
             })
             // Share the key with the keyshare server
@@ -117,7 +106,7 @@ export default function UnlockProtocolDialog(props: UnlockProtocolDialogProps) {
                     variant="contained"
                     disabled={!(!!currentUnlockTarget.length && !!currentUnlockPost)}
                     onClick={onInsert}>
-                    Submit_i18n
+                    Submit_i18nh
                 </Button>
             </DialogActions>
         </InjectedDialog>

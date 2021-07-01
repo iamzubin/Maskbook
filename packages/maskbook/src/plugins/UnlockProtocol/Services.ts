@@ -1,9 +1,4 @@
 import { GraphQLClient, gql } from 'graphql-request'
-// import * as self from './Services'
-
-// setTimeout(() => {
-//     AsyncCall(self, { channel: new WorkerChannel() })
-// }, 0)
 
 const graphEndpoint = 'https://api.thegraph.com/subgraphs/name/unlock-protocol/unlock-rinkeby'
 const graphQLClient = new GraphQLClient(graphEndpoint)
@@ -53,17 +48,30 @@ export const getLocks = async (_address1: String) => {
 
 // func().catch((error) => console.error(error))
 
-const keyServerEndpoint = 'http://0.0.0.0:5000'
+const keyServerEndpoint = 'http://localhost:5000'
 
-export const postUnlockData = async (myBody: string) => {
+export const postUnlockData = async (myBody: any) => {
     const response = await fetch(keyServerEndpoint, {
         method: 'POST',
-        body: myBody, // string or object
+        mode: 'no-cors',
+        body: JSON.stringify(myBody), // string or object
         headers: {
             'Content-Type': 'application/json',
         },
     })
-    const myJson = await response.json() //extract JSON from the http response
+    // const myJson = await response.json() //extract JSON from the http response
     // do something with myJson
-    return myJson
+    console.log(response)
+    // return myJson
+    return response
 }
+export const gettest = async (test: any) => {
+    const response = await fetch('https://reqres.in/api/users?page=2', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+}
+
+export * from './utils/crypto'

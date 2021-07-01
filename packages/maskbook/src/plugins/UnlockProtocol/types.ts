@@ -5,3 +5,8 @@ export interface UnlockLocks {
         price?: string
     }
 }
+
+export interface UnlockProtocolMetadata {
+    post: string
+    target: UnlockLocks[]
+}
