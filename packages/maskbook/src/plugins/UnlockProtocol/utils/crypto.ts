@@ -16,3 +16,22 @@ export async function encryptUnlockData(content: string): Promise<{
 
     return { iv: iv, key: exportkey, encrypted: encrypted }
 }
+
+export async function decryptUnlockData(
+    iv: ArrayBuffer,
+    key: JsonWebKey,
+    encrypted: ArrayBuffer,
+): Promise<{
+    content: string
+}> {
+    var importkey = await crypto.subtle.importKey('jwk', key, 'AES-GCM', true, ['encrypt', 'decrypt'])
+    var decrypted = crypto.subtle.decrypt(
+        {
+            name: 'AES-GCM',
+            iv: iv,
+        },
+        importkey,
+        encrypted,
+    )
+    return { content: 'dn' }
+}

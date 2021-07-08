@@ -1,6 +1,6 @@
 import { GraphQLClient, gql } from 'graphql-request'
+import { graphEndpoint, keyServerEndpoint } from './constants'
 
-const graphEndpoint = 'https://api.thegraph.com/subgraphs/name/unlock-protocol/unlock-rinkeby'
 const graphQLClient = new GraphQLClient(graphEndpoint)
 
 export const verifyHolder = async (_lockAddress: String, _holder: String) => {
@@ -25,7 +25,7 @@ export const verifyHolder = async (_lockAddress: String, _holder: String) => {
     return false
 }
 
-export const getLocks = async (_address1: String) => {
+export const getLocks = async (_address1: String, chain: Number) => {
     const query = gql`
         query lockManager($address: String!) {
             lockManagers(where: { address: $address }) {
@@ -47,8 +47,6 @@ export const getLocks = async (_address1: String) => {
 // export func as func
 
 // func().catch((error) => console.error(error))
-
-const keyServerEndpoint = 'http://localhost:5000'
 
 export const postUnlockData = async (myBody: any) => {
     const response = await fetch(keyServerEndpoint, {

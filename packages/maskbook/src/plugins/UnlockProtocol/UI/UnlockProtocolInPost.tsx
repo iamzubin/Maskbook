@@ -13,6 +13,8 @@ export default function UnlockProtocolInPost(props: UnlockProtocolInPostProps) {
         const metadata = UnlockProtocolMetadataReader(props.message.meta)
         if (metadata.ok) {
             // TODO : call decode functions and api's here
+            // Call the api
+            // decryptUnlockData(data from api)
         }
     }, [props.message.meta])
 

@@ -26,9 +26,11 @@ export interface SelectRecipientsUnlockDialogUIProps extends withClasses<never> 
     selected: UnlockLocks[]
     disabled: boolean
     disabledItems?: UnlockLocks[]
+    chain: number
     onClose: () => void
     onSelect: (item: UnlockLocks) => void
     onDeselect: (item: UnlockLocks) => void
+    setChain: (chain: number) => void
 }
 
 export function SelectRecipientsUnlockDialogUI(props: SelectRecipientsUnlockDialogUIProps) {
@@ -50,6 +52,7 @@ export function SelectRecipientsUnlockDialogUI(props: SelectRecipientsUnlockDial
         <InjectedDialog open={props.open} title="select_unlock_lock_i18n" onClose={props.onClose}>
             <DialogContent>
                 <InputBase value={search} onChange={(e) => setSearch(e.target.value)} />
+
                 <List style={{ height: items.length * LIST_ITEM_HEIGHT }} dense>
                     {itemsAfterSearch.length === 0 ? (
                         <ListItem>

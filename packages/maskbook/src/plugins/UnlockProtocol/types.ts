@@ -1,6 +1,7 @@
 export interface UnlockLocks {
     lock: {
         address: string
+        chain: number
         name: string
         price?: string
     }

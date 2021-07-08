@@ -1,4 +1,5 @@
 // import { TextField } from '@dimensiondev/maskbook-theme/src/component-changes'
+import { useChainId } from '@dimensiondev/web3-shared'
 import { DialogActions, DialogContent, DialogProps, TextField, Chip, Button } from '@material-ui/core'
 import { useEffect } from 'react'
 import { useState } from 'react'
@@ -20,13 +21,14 @@ export default function UnlockProtocolDialog(props: UnlockProtocolDialogProps) {
     // var content : any = ""
     const [open, setOpen] = useState(false)
     const [address, setAddress] = useState('0x3a574461fd1279FCF96043bcF416C53B7e8dcEC0')
+    const [currentUnlockChain, setCurrentUnlockChain] = useState(useChainId())
     const [currentUnlockPost, setCurrentUnlockPost] = useState('')
     const [currentUnlockTarget, setCurrentUnlockTarget] = useState<UnlockLocks[]>(() => [])
     const [availableUnlockTarget, setAvailableUnlockTarget] = useState<UnlockLocks[]>(() => [])
     const { children } = props
 
     useEffect(() => {
-        PuginUnlockProtocolRPC.getLocks('0x3a574461fd1279FCF96043bcF416C53B7e8dcEC0')
+        PuginUnlockProtocolRPC.getLocks(address, currentUnlockChain)
             .then((value) => {
                 if (value.lockManagers.length) {
                     setAvailableUnlockTarget(value.lockManagers)
@@ -40,6 +42,7 @@ export default function UnlockProtocolDialog(props: UnlockProtocolDialogProps) {
                     {
                         lock: {
                             name: error.message || 'Some error occured',
+                            chain: currentUnlockChain,
                             address: '0x0',
                             price: '0',
                         },
@@ -98,6 +101,8 @@ export default function UnlockProtocolDialog(props: UnlockProtocolDialogProps) {
                     open={open}
                     selected={currentUnlockTarget}
                     disabled={false}
+                    chain={currentUnlockChain}
+                    setChain={(chain) => setCurrentUnlockChain(chain)}
                     items={availableUnlockTarget}
                     onClose={() => setOpen(false)}
                 />
