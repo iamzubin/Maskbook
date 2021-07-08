@@ -23,7 +23,7 @@ export default function UnlockProtocolInPost(props: UnlockProtocolInPostProps) {
               return (
                   <div>
                       <MaskbookPluginWrapper width={300} pluginName="Unlock Protocol">
-                          {r.post}
+                          {r.iv}
                       </MaskbookPluginWrapper>
                   </div>
               )

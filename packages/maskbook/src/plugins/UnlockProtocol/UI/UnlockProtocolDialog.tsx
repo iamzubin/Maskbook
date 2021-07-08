@@ -1,9 +1,12 @@
 // import { TextField } from '@dimensiondev/maskbook-theme/src/component-changes'
+import { encodeArrayBuffer } from '@dimensiondev/kit'
 import { useChainId } from '@dimensiondev/web3-shared'
 import { DialogActions, DialogContent, DialogProps, TextField, Chip, Button } from '@material-ui/core'
 import { useEffect } from 'react'
 import { useState } from 'react'
 import { InjectedDialog } from '../../../components/shared/InjectedDialog'
+import { editActivatedPostMetadata } from '../../../protocols/typed-message/global-state'
+import { pluginMetaKey } from '../constants'
 import type { UnlockLocks } from '../types'
 import { PuginUnlockProtocolRPC } from '../utils'
 import { SelectRecipientsUnlockDialogUI } from './SelectRecipientsUnlockDialog'
@@ -55,19 +58,24 @@ export default function UnlockProtocolDialog(props: UnlockProtocolDialogProps) {
         if (!!currentUnlockTarget.length && !!currentUnlockPost) {
             PuginUnlockProtocolRPC.encryptUnlockData(currentUnlockPost).then((encres) => {
                 var uploadData = {
-                    identifier: encres.iv,
-                    unlockLocks: currentUnlockTarget,
-                    unlockKey: encres.key,
+                    identifier: encodeArrayBuffer(encres.iv),
+                    unlockLocks: currentUnlockTarget.map((x) => x.lock.address),
+                    unlockKey: encres.key.k,
                 }
                 PuginUnlockProtocolRPC.postUnlockData(uploadData).then((res) => {
-                    // if (res.body.message == 'success')
-                    //     props.onConfirm({ post: currentUnlockPost, target: currentUnlockTarget })
-                    // else {
-                    //     return
-                    // }
+                    console.log(res)
+                    if (res.status == 200) {
+                        console.log('YOOo')
+                        props.onConfirm({ post: currentUnlockPost, target: currentUnlockTarget })
+                        var data = { iv: uploadData.identifier, unlockLocks: uploadData.unlockLocks }
+                        editActivatedPostMetadata((next) =>
+                            !!data ? next.set(pluginMetaKey, data) : next.delete(pluginMetaKey),
+                        )
+                    } else {
+                        return
+                    }
                 })
             })
-            // Share the key with the keyshare server
         } else {
             return
         }

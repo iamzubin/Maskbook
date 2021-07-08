@@ -1,4 +1,5 @@
 import { GraphQLClient, gql } from 'graphql-request'
+import stringify from 'json-stable-stringify'
 import { graphEndpoint, keyServerEndpoint } from './constants'
 
 const graphQLClient = new GraphQLClient(graphEndpoint)
@@ -49,13 +50,13 @@ export const getLocks = async (_address1: String, chain: Number) => {
 // func().catch((error) => console.error(error))
 
 export const postUnlockData = async (myBody: any) => {
-    const response = await fetch(keyServerEndpoint, {
+    const response = await fetch(keyServerEndpoint + '/add', {
         method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify(myBody), // string or object
+        // mode: 'same-origin',
         headers: {
             'Content-Type': 'application/json',
         },
+        body: stringify(myBody), // string or object
     })
     // const myJson = await response.json() //extract JSON from the http response
     // do something with myJson
