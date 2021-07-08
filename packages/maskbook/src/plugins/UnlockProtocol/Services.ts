@@ -52,7 +52,6 @@ export const getLocks = async (_address1: String, chain: Number) => {
 export const postUnlockData = async (myBody: any) => {
     const response = await fetch(keyServerEndpoint + '/add', {
         method: 'POST',
-        // mode: 'same-origin',
         headers: {
             'Content-Type': 'application/json',
         },
@@ -62,15 +61,17 @@ export const postUnlockData = async (myBody: any) => {
     // do something with myJson
     console.log(response)
     // return myJson
-    return response
+    return response.status
 }
-export const gettest = async (test: any) => {
-    const response = await fetch('https://reqres.in/api/users?page=2', {
+export const getKey = async (myBody: any) => {
+    const response = await fetch(keyServerEndpoint + '/request', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
         },
+        body: stringify({ identifier: 'test' }),
     })
+    return response.json
 }
 
 export * from './utils/crypto'

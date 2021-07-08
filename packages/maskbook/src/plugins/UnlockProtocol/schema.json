@@ -1,0 +1,21 @@
+{
+    "type": "object",
+    "properties": {
+        "iv": {
+            "type": "string",
+            "title": "iv"
+        },
+        "unlockLocks": {
+            "type": "array",
+            "title": "unlockLocks"
+        },
+        "key": {
+            "type": "string",
+            "title": "key"
+        },
+        "post": {
+            "type": "string",
+            "title": "post"
+        }
+    }
+}

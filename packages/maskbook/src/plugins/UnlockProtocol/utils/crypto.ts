@@ -1,9 +1,9 @@
-import { encodeText } from '@dimensiondev/kit'
+import { decodeArrayBuffer, encodeArrayBuffer, encodeText } from '@dimensiondev/kit'
 
 export async function encryptUnlockData(content: string): Promise<{
-    iv: ArrayBuffer
-    key: JsonWebKey
-    encrypted: ArrayBuffer
+    iv: string
+    key: string
+    encrypted: string
 }> {
     const iv: ArrayBuffer = crypto.getRandomValues(new Uint8Array(16))
     const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt'])
@@ -12,26 +12,26 @@ export async function encryptUnlockData(content: string): Promise<{
         key,
         typeof content === 'string' ? encodeText(content) : content,
     )
-    const exportkey = await crypto.subtle.exportKey('jwk', key)
+    const exportkey = await crypto.subtle.exportKey('raw', key)
 
-    return { iv: iv, key: exportkey, encrypted: encrypted }
+    return { iv: encodeArrayBuffer(iv), key: encodeArrayBuffer(exportkey), encrypted: encodeArrayBuffer(encrypted) }
 }
 
 export async function decryptUnlockData(
-    iv: ArrayBuffer,
-    key: JsonWebKey,
-    encrypted: ArrayBuffer,
+    iv: string,
+    key: string,
+    encrypted: string,
 ): Promise<{
     content: string
 }> {
-    var importkey = await crypto.subtle.importKey('jwk', key, 'AES-GCM', true, ['encrypt', 'decrypt'])
-    var decrypted = crypto.subtle.decrypt(
+    var importkey = await crypto.subtle.importKey('raw', decodeArrayBuffer(key), 'AES-GCM', true, ['decrypt'])
+    var decrypted = await crypto.subtle.decrypt(
         {
             name: 'AES-GCM',
-            iv: iv,
+            iv: decodeArrayBuffer(iv),
         },
         importkey,
-        encrypted,
+        decodeArrayBuffer(encrypted),
     )
-    return { content: 'dn' }
+    return { content: encodeArrayBuffer(decrypted) }
 }

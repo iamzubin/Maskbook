@@ -1,18 +1,28 @@
 import type { TypedMessage } from '@dimensiondev/maskbook-shared'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import MaskbookPluginWrapper from '../../MaskbookPluginWrapper'
-import { renderWithUnlockProtocolMetadata, UnlockProtocolMetadataReader } from '../utils'
+import { PuginUnlockProtocolRPC, renderWithUnlockProtocolMetadata, UnlockProtocolMetadataReader } from '../utils'
 
 interface UnlockProtocolInPostProps {
     message: TypedMessage
 }
 
+function UnlockDecipher(props: { iv: string }) {
+    useEffect(() => {})
+    return <> {props.iv} </>
+}
+
 export default function UnlockProtocolInPost(props: UnlockProtocolInPostProps) {
     const { message } = props
+    const [cont, setCont] = useState('')
     useEffect(() => {
         const metadata = UnlockProtocolMetadataReader(props.message.meta)
         if (metadata.ok) {
-            // TODO : call decode functions and api's here
+            PuginUnlockProtocolRPC.decryptUnlockData(metadata.val.iv, metadata.val.key, metadata.val.post).then(
+                (content) => {
+                    setCont(atob(content.content))
+                },
+            )
             // Call the api
             // decryptUnlockData(data from api)
         }
@@ -23,7 +33,7 @@ export default function UnlockProtocolInPost(props: UnlockProtocolInPostProps) {
               return (
                   <div>
                       <MaskbookPluginWrapper width={300} pluginName="Unlock Protocol">
-                          {r.iv}
+                          {cont}
                       </MaskbookPluginWrapper>
                   </div>
               )

@@ -1,7 +1,7 @@
 import { PluginConfig, PluginStage, PluginScope } from '../types'
 import { createCompositionDialog } from '../utils/createCompositionDialog'
 import { identifier, pluginDescription, pluginIcon, pluginMetaKey, pluginName } from './constants'
-import type { UnlockLocks } from './types'
+import type { UnlockProtocolMetadata } from './types'
 import UnlockProtocolDialog from './UI/UnlockProtocolDialog'
 import UnlockProtocolInPost from './UI/UnlockProtocolInPost'
 import { UnlockProtocolMetadataReader } from './utils'
@@ -23,14 +23,10 @@ export const UnlockProtocolPluginDefine: PluginConfig = {
         const metadata = UnlockProtocolMetadataReader(props.message.meta)
         if (!metadata.ok) return null
         return <UnlockProtocolInPost {...props} />
-        // return null
     },
-    PageComponent: UnlockProtocolCompositionUI,
     postDialogMetadataBadge: new Map([
-        [
-            pluginMetaKey,
-            (meta: { post: string; target: UnlockLocks[] }) => `a locked post to ${meta.target.length} lock(s) `,
-        ],
+        [pluginMetaKey, (meta: UnlockProtocolMetadata) => `a locked post to using unlock protocol `],
     ]),
+    PageComponent: UnlockProtocolCompositionUI,
     postDialogEntries: [UnlockProtocolCompositionEntry],
 }
