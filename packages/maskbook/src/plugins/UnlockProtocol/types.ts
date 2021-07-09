@@ -9,7 +9,7 @@ export interface UnlockLocks {
 
 export interface UnlockProtocolMetadata {
     iv: string
-    target: string[]
+    unlockLocks: (string | number)[]
     post: string
     key: string
 }

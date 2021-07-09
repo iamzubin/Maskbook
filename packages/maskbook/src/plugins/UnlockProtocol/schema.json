@@ -7,11 +7,18 @@
         },
         "unlockLocks": {
             "type": "array",
-            "title": "unlockLocks"
-        },
-        "key": {
-            "type": "string",
-            "title": "key"
+            "additionalProperties": true,
+            "title": "unlockLocks",
+            "properties": {
+                "unlocklock": {
+                    "type": "string",
+                    "title": "unlocklock"
+                },
+                "chainid": {
+                    "type": "number",
+                    "title": "chainid"
+                }
+            }
         },
         "post": {
             "type": "string",

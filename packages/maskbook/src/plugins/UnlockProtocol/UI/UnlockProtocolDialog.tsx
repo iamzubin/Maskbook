@@ -1,5 +1,5 @@
 // import { TextField } from '@dimensiondev/maskbook-theme/src/component-changes'
-import { useChainId } from '@dimensiondev/web3-shared'
+import { useAccount, useChainId } from '@dimensiondev/web3-shared'
 import { DialogActions, DialogContent, DialogProps, TextField, Chip, Button } from '@material-ui/core'
 import { useEffect } from 'react'
 import { useState } from 'react'
@@ -22,15 +22,14 @@ export default function UnlockProtocolDialog(props: UnlockProtocolDialogProps) {
     // const { t } = useI18N()
     // var content : any = ""
     const [open, setOpen] = useState(false)
-    const [address, setAddress] = useState('0x3a574461fd1279FCF96043bcF416C53B7e8dcEC0')
+    const [address, setAddress] = useState(useAccount())
     const [currentUnlockChain, setCurrentUnlockChain] = useState(useChainId())
     const [currentUnlockPost, setCurrentUnlockPost] = useState('')
     const [currentUnlockTarget, setCurrentUnlockTarget] = useState<UnlockLocks[]>(() => [])
     const [availableUnlockTarget, setAvailableUnlockTarget] = useState<UnlockLocks[]>(() => [])
     const { children } = props
-
     useEffect(() => {
-        PuginUnlockProtocolRPC.getLocks(address, currentUnlockChain)
+        PuginUnlockProtocolRPC.getLocks(address, currentUnlockChain.toString())
             .then((value) => {
                 if (value.lockManagers.length) {
                     setAvailableUnlockTarget(value.lockManagers)
@@ -58,7 +57,9 @@ export default function UnlockProtocolDialog(props: UnlockProtocolDialogProps) {
             PuginUnlockProtocolRPC.encryptUnlockData(currentUnlockPost).then((encres) => {
                 var uploadData = {
                     identifier: encres.iv,
-                    unlockLocks: currentUnlockTarget.map((x) => x.lock.address),
+                    unlockLocks: currentUnlockTarget.map((x) => {
+                        return { unlocklock: x.lock.address, chainid: currentUnlockChain }
+                    }),
                     unlockKey: encres.key,
                 }
                 PuginUnlockProtocolRPC.postUnlockData(uploadData).then((res) => {
@@ -68,14 +69,12 @@ export default function UnlockProtocolDialog(props: UnlockProtocolDialogProps) {
                             iv: uploadData.identifier,
                             unlockLocks: uploadData.unlockLocks,
                             post: encres.encrypted,
-                            key: encres.key,
                         }
                         editActivatedPostMetadata((next) =>
                             data
                                 ? next.set(pluginMetaKey, JSON.parse(JSON.stringify(data)))
                                 : next.delete(pluginMetaKey),
                         )
-                        console.log(data)
                         props.onConfirm({ post: currentUnlockPost, target: currentUnlockTarget })
                     } else {
                         console.log('soooo')

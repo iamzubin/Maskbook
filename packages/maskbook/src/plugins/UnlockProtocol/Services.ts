@@ -1,10 +1,14 @@
 import { GraphQLClient, gql } from 'graphql-request'
 import stringify from 'json-stable-stringify'
-import { graphEndpoint, keyServerEndpoint } from './constants'
+import { graphEndpointKeyVal, keyServerEndpoint } from './constants'
 
-const graphQLClient = new GraphQLClient(graphEndpoint)
+var graphQLClients: { [key: string]: GraphQLClient } = {}
 
-export const verifyHolder = async (_lockAddress: String, _holder: String) => {
+for (const [key, url] of Object.entries(graphEndpointKeyVal)) {
+    graphQLClients[key] = new GraphQLClient(url)
+}
+
+export const verifyHolder = async (_lockAddress: String, _holder: String, _chain: string) => {
     const query = gql`
         query locks($address: String!) {
             locks(where: { address: $address }) {
@@ -19,14 +23,14 @@ export const verifyHolder = async (_lockAddress: String, _holder: String) => {
     const variables = {
         address: _lockAddress,
     }
-    const data = await graphQLClient.request(query, variables)
+    const data = await graphQLClients[_chain].request(query, variables)
     for (let index = 0; index < data.locks[0].keys.length; index++) {
         if (data.locks[0].keys[index].owner.id == _holder) return true
     }
     return false
 }
 
-export const getLocks = async (_address1: String, chain: Number) => {
+export const getLocks = async (_address1: String, chain: string) => {
     const query = gql`
         query lockManager($address: String!) {
             lockManagers(where: { address: $address }) {
@@ -41,7 +45,7 @@ export const getLocks = async (_address1: String, chain: Number) => {
     const variables = {
         address: _address1,
     }
-    const data = await graphQLClient.request(query, variables)
+    const data = await graphQLClients[chain].request(query, variables)
     return data
 }
 
@@ -63,7 +67,7 @@ export const postUnlockData = async (myBody: any) => {
     // return myJson
     return response.status
 }
-export const getKey = async (myBody: any) => {
+export const getKey = async (iv: any) => {
     const response = await fetch(keyServerEndpoint + '/request', {
         method: 'GET',
         headers: {

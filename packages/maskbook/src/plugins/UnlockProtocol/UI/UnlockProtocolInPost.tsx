@@ -18,11 +18,13 @@ export default function UnlockProtocolInPost(props: UnlockProtocolInPostProps) {
     useEffect(() => {
         const metadata = UnlockProtocolMetadataReader(props.message.meta)
         if (metadata.ok) {
-            PuginUnlockProtocolRPC.decryptUnlockData(metadata.val.iv, metadata.val.key, metadata.val.post).then(
-                (content) => {
-                    setCont(atob(content.content))
-                },
-            )
+            PuginUnlockProtocolRPC.getKey(metadata.val.iv).then((response) => {
+                PuginUnlockProtocolRPC.decryptUnlockData(metadata.val.iv, metadata.val.key, metadata.val.post).then(
+                    (content) => {
+                        setCont(atob(content.content))
+                    },
+                )
+            })
             // Call the api
             // decryptUnlockData(data from api)
         }
