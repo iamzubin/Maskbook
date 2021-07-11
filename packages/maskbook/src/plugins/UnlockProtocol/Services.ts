@@ -67,15 +67,15 @@ export const postUnlockData = async (myBody: any) => {
     // return myJson
     return response.status
 }
-export const getKey = async (iv: any) => {
+export const getKey = async <requestKeyResponse>(iv: any) => {
     const response = await fetch(keyServerEndpoint + '/request', {
-        method: 'GET',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: stringify({ identifier: 'test' }),
+        body: stringify({ identifier: iv }),
     })
-    return response.json
+    return response.json()
 }
 
 export * from './utils/crypto'

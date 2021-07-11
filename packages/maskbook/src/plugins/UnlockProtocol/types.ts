@@ -13,3 +13,14 @@ export interface UnlockProtocolMetadata {
     post: string
     key: string
 }
+
+export interface UnlockProtocolResponse {
+    iv: string
+    unlockLocks: (string | number)[]
+    post: string
+    unlockKey: string
+}
+
+export interface requestKeyResponse {
+    post: UnlockProtocolResponse
+}

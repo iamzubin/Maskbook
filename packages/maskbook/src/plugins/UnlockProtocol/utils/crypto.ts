@@ -33,5 +33,5 @@ export async function decryptUnlockData(
         importkey,
         decodeArrayBuffer(encrypted),
     )
-    return { content: encodeArrayBuffer(decrypted) }
+    return { content: atob(encodeArrayBuffer(decrypted)) }
 }
