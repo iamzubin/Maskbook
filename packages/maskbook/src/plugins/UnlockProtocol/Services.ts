@@ -49,9 +49,23 @@ export const getLocks = async (_address1: String, chain: string) => {
     return data
 }
 
-// export func as func
+export const getPurchasedLocks = async (_address: string, _chain: string) => {
+    const query = gql`
+        query keyPurchases($address: String!) {
+            keyPurchases(orderBy: timestamp, orderDirection: desc, where: { purchaser: $address }) {
+                lock
+                purchaser
+            }
+        }
+    `
 
-// func().catch((error) => console.error(error))
+    const variables = {
+        address: _address,
+    }
+
+    const data = await graphQLClients[_chain].request(query, variables)
+    return data
+}
 
 export const postUnlockData = async (myBody: any) => {
     const response = await fetch(keyServerEndpoint + '/add', {
