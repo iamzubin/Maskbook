@@ -8,26 +8,58 @@ for (const [key, url] of Object.entries(graphEndpointKeyVal)) {
     graphQLClients[key] = new GraphQLClient(url)
 }
 
-export const verifyHolder = async (_lockAddress: String, _holder: String, _chain: string) => {
+export interface verifyHolderResponse {
+    keyHolders: {
+        keys: {
+            expiration: number
+            keyId: string
+            lock: {
+                address: string
+            }
+        }[]
+    }[]
+}
+
+const verifyHolder = async <verifyHolderResponse>(_lockAddress: String, _holder: String, _chain: number) => {
     const query = gql`
-        query locks($address: String!) {
-            locks(where: { address: $address }) {
+        query keyHolders($address: String!) {
+            keyHolders(where: { address: $address }) {
                 keys {
-                    owner {
-                        id
+                    expiration
+                    keyId
+                    lock {
+                        address
                     }
                 }
             }
         }
     `
     const variables = {
-        address: _lockAddress,
+        address: _holder,
     }
     const data = await graphQLClients[_chain].request(query, variables)
-    for (let index = 0; index < data.locks[0].keys.length; index++) {
-        if (data.locks[0].keys[index].owner.id == _holder) return true
-    }
-    return false
+    return data
+}
+
+export const verifyActiveLock = (data: { lock: string; address: string; chain: number }) => {
+    verifyHolder(data.lock, data.address, data.chain).then((result) => {
+        var response: verifyHolderResponse = result
+        var keys = response.keyHolders[0].keys
+        keys.forEach((key) => {
+            if (key.lock.address == data.lock) {
+                var currentTimeInSeconds = Math.floor(Date.now() / 1000)
+                var diff = key.expiration - currentTimeInSeconds
+                if (diff > 0) {
+                    return true
+                } else {
+                    return false
+                }
+            } else {
+                return false
+            }
+        })
+        return false
+    })
 }
 
 export const getLocks = async (_address1: String, chain: string) => {
@@ -81,13 +113,13 @@ export const postUnlockData = async (myBody: any) => {
     // return myJson
     return response.status
 }
-export const getKey = async <requestKeyResponse>(iv: any) => {
+export const getKey = async <requestKeyResponse>(data: any) => {
     const response = await fetch(keyServerEndpoint + '/request', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: stringify({ identifier: iv }),
+        body: stringify(data),
     })
     return response.json()
 }

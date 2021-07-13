@@ -22,17 +22,26 @@ export default function UnlockProtocolInPost(props: UnlockProtocolInPostProps) {
         if (metadata.ok) {
             PuginUnlockProtocolRPC.getPurchasedLocks(address, '4').then((res) => {
                 res.keyPurchases.forEach((e: { lock: string }) => {
-                    console.log(e.lock)
-                })
-            })
-            PuginUnlockProtocolRPC.getKey(metadata.val.iv).then((response) => {
-                console.log('key :' + response.post.unlockKey)
-                PuginUnlockProtocolRPC.decryptUnlockData(
-                    metadata.val.iv,
-                    response.post.unlockKey,
-                    metadata.val.post,
-                ).then((content) => {
-                    setCont(content.content)
+                    metadata.val.unlockLocks.forEach((locks) => {
+                        if (e.lock == locks.unlocklock) {
+                            var requestdata = {
+                                lock: e.lock,
+                                address: address,
+                                chain: locks.chainid,
+                                identifier: metadata.val.iv,
+                            }
+                            PuginUnlockProtocolRPC.getKey(requestdata).then((response) => {
+                                console.log('key :' + response.post.unlockKey)
+                                PuginUnlockProtocolRPC.decryptUnlockData(
+                                    metadata.val.iv,
+                                    response.post.unlockKey,
+                                    metadata.val.post,
+                                ).then((content) => {
+                                    setCont(content.content)
+                                })
+                            })
+                        }
+                    })
                 })
             })
             // Call the api

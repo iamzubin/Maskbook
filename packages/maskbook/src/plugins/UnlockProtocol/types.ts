@@ -7,16 +7,21 @@ export interface UnlockLocks {
     }
 }
 
+export interface UnlockLockInMetadata {
+    unlocklock: string
+    chainid: number
+}
+
 export interface UnlockProtocolMetadata {
     iv: string
-    unlockLocks: (string | number)[]
+    unlockLocks: UnlockLockInMetadata[]
     post: string
     key: string
 }
 
 export interface UnlockProtocolResponse {
     iv: string
-    unlockLocks: (string | number)[]
+    unlockLocks: UnlockLockInMetadata[]
     post: string
     unlockKey: string
 }
