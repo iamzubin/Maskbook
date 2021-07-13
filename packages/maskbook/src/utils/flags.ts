@@ -47,6 +47,7 @@ export const Flags = {
     metamask_support_enabled: webOnly,
     toolbar_enabled: webOnly,
     toolbox_enabled: webOnly,
+    unlockprotocol_enabled: true,
     wallet_mnemonic_words_backup_enabled: false,
     wallet_private_key_backup_enabled: true,
     wallet_gas_price_dialog_enable: false,

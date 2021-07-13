@@ -22,6 +22,7 @@ import { sideEffect } from '../utils/side-effects'
 import { VCentPluginDefine } from './VCent/define'
 import { SnapShotPluginDefine } from './Snapshot/define'
 import { DHedgePluginDefine } from './dHEDGE/define'
+import { UnlockProtocolPluginDefine } from './UnlockProtocol/define'
 
 sideEffect.then(() => {
     plugins.add(EthereumPluginDefine)
@@ -39,5 +40,6 @@ sideEffect.then(() => {
     if (Flags.snapshot_enabled) plugins.add(SnapShotPluginDefine)
     if (Flags.collectibles_enabled) plugins.add(CollectiblesPluginDefine)
     if (Flags.dhedge_enabled) plugins.add(DHedgePluginDefine)
+    if (Flags.unlockprotocol_enabled) plugins.add(UnlockProtocolPluginDefine)
     if (process.env.STORYBOOK) plugins.add(StorybookPluginDefine)
 })
